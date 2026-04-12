@@ -1,5 +1,5 @@
 // weapon attack behaviors
-import { BurnZone, FollowZone, LightningStrike, LightningFallStrike, OrbitingBlade } from './zones.js';
+import { BurnZone, FollowZone, LightningFallStrike, OrbitingBlade } from './zones.js';
 
 // line damage attack
 function lineDamage(scene, player, enemies, x, y, angle, length, width, damage, damageType, sourceKey = 'melee', invulnMs = 140) {
@@ -178,13 +178,12 @@ export function executeWeaponAttack(scene, player, weapon, target, enemies, proj
       if (weapon.maxMode && player && player.scene && player.isAlive) {
         const now = player.scene.time.now || Date.now();
         player.imperviousUntil = Math.max(player.imperviousUntil || 0, now + 1200);
-        // Optional visual cue
+        // Flash player white to signal invulnerability window
         if (player.sprite) {
-          const fx = player.scene.add.sprite(player.sprite.x, player.sprite.y, 'BlockFlash_0');
-          fx.setDepth(1400);
-          fx.setScale(1.1);
-          fx.play('block_flash_anim');
-          fx.once('animationcomplete', () => fx.destroy());
+          player.sprite.setTintFill(0xffffff);
+          player.scene.time.delayedCall(300, () => {
+            if (player.isAlive && player.sprite) player.sprite.clearTint();
+          });
         }
       }
       return true;

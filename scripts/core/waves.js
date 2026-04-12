@@ -4,8 +4,8 @@
 export function getRandomEnemyType(currentDifficulty) {
   const tiers = [
     ['slime', 'bat', 'spider', 'snake', 'worm'],
-    ['lereon_knight', 'wolf', 'skeleton_sword', 'orc', 'burning_demon_imp', 'skeleton_sword_animated'],
-    ['werewolf', 'viking_warrior', 'baby_dragon', 'big_skeleton', 'demon_axe_red'],
+    ['lereon_knight', 'wolf', 'skeleton_sword', 'orc', 'burning_demon_imp'],
+    ['werewolf', 'viking_warrior', 'baby_dragon', 'big_skeleton'],
     ['burning_demon', 'skeleton_king', 'death_angel', 'legendary_dragon']
   ];
   const tierIndex = Math.min(3, Math.floor(currentDifficulty / 2));

@@ -60,6 +60,8 @@ class Projectile {
     createProjectileSprite() {
         // Prefer an explicit projectile sprite when provided
         let usedKey = null;
+        let needsFireballAnim = false;
+        let needsOrbAnim = false;
         if (this.weapon.projectileSprite) {
             usedKey = this.weapon.projectileSprite;
             this.sprite = this.scene.add.sprite(this.startX, this.startY, usedKey);
@@ -71,18 +73,14 @@ class Projectile {
                     this.sprite.setScale(0.8);
                     break;
                 case 'magic':
-                    if (this.weapon.name.includes('Wand')) {
-                        usedKey = 'fireball1';
-                        this.sprite = this.scene.add.sprite(this.startX, this.startY, usedKey);
-                        this.animateFireball();
-                    } else if (this.weapon.name.includes('Orb')) {
+                    if (this.weapon.name.includes('Orb')) {
                         usedKey = 'fireball3';
                         this.sprite = this.scene.add.sprite(this.startX, this.startY, usedKey);
-                        this.animateOrb();
+                        needsOrbAnim = true;
                     } else {
                         usedKey = 'fireball1';
                         this.sprite = this.scene.add.sprite(this.startX, this.startY, usedKey);
-                        this.animateFireball();
+                        needsFireballAnim = true;
                     }
                     break;
                 default:
@@ -103,6 +101,9 @@ class Projectile {
             const scale = key.startsWith('fireball') ? (this.weapon.projectileScale * sizeBuff) : this.weapon.projectileScale;
             this.sprite.setScale(scale);
         }
+        // Start animations after scale is applied so relative tweens use the correct base scale
+        if (needsFireballAnim) this.animateFireball();
+        if (needsOrbAnim) this.animateOrb();
         this.sprite.setDepth(50);
         // Correct dagger sprite lean by rotating -45 degrees
         if ((this.weapon && (this.weapon.id === 'weapon_dagger' || this.weapon.name === 'Swift Dagger')) || key === 'weapon_dagger') {
@@ -133,10 +134,11 @@ class Projectile {
         });
     }
     animateOrb() {
+        const s = this.sprite.scaleX;
         this.scene.tweens.add({
             targets: this.sprite,
-            scaleX: 1.5,
-            scaleY: 1.5,
+            scaleX: s * 1.35,
+            scaleY: s * 1.35,
             duration: 300,
             yoyo: true,
             repeat: -1
@@ -924,6 +926,7 @@ class Player extends Entity {
                 this.speed += value;
                 const enemySpeedBonus = Math.floor(value * 0.25);
                 globalEnemySpeedBonus += enemySpeedBonus;
+                window.globalEnemySpeedBonus = globalEnemySpeedBonus;
                 enemies.forEach(enemy => {
                     if (enemy.isAlive) {
                         enemy.speed += enemySpeedBonus;
@@ -1637,10 +1640,13 @@ class Player extends Entity {
     }
 
     performMeleeAttackWithWeapon(weapon, target, damage) {
-        this.showWeaponSwing(target);
+        if (target) {
+            const angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, target.sprite.x, target.sprite.y);
+            this.showWeaponSwingAtAngle(angle, weapon);
+        }
         this.createSlashHitboxFor(weapon, target, damage);
-    this.showAttackEffect(target);
-    this.applyWeaponUniqueEffectFor(weapon, target, damage);
+        this.showAttackEffect(target);
+        this.applyWeaponUniqueEffectFor(weapon, target, damage);
     }
     createSlashHitbox(target, damage) {
         // Backward-compatible; use current weapon
@@ -1871,14 +1877,24 @@ class Player extends Entity {
         });
     }
     showAttackEffect(target) {
-        if (!this.currentWeapon || !this.currentWeapon.attackEffect) return;
-        const effect = this.scene.add.sprite(target.sprite.x, target.sprite.y, this.currentWeapon.attackEffect);
+        if (!target || !target.sprite) return;
+        const w = this.currentWeapon;
+        const dmgType = (w && w.damageType) ? w.damageType : 'physical';
+        let texKey, animKey;
+        if (dmgType === 'burn') {
+            texKey = 'fire_effect'; animKey = 'fire_effect_anim';
+        } else if (dmgType === 'lightning' || dmgType === 'armor_weaken') {
+            texKey = 'bluefire_effect'; animKey = 'bluefire_effect_anim';
+        } else if (dmgType === 'poison') {
+            texKey = 'magic_effect'; animKey = 'magic_effect_anim';
+        } else {
+            texKey = 'weaponhit_effect'; animKey = 'weaponhit_effect_anim';
+        }
+        const effect = this.scene.add.sprite(target.sprite.x, target.sprite.y, texKey);
         effect.setDepth(1500);
-        effect.setScale(1.5);
-        effect.play(this.currentWeapon.attackEffect + '_anim');
-        effect.on('animationcomplete', () => {
-            effect.destroy();
-        });
+        effect.setScale(1.0);
+        effect.play(animKey);
+        effect.on('animationcomplete', () => effect.destroy());
     }
     takeDamage(amount) {
         if (!this.isAlive) return;
@@ -2556,10 +2572,10 @@ function checkEntityCollisions() {
                 player.takeDamage(damage);
                 player.collisionCooldowns.set(enemyId, currentTime);
                 player.sprite.setTint(0xff0000);
-                enemy.sprite.setTint(0xffaaaa);
+                enemy.sprite.setTintFill(0xffffff);
                 this.time.delayedCall(200, () => {
                     if (enemy && enemy.isAlive && enemy.sprite) {
-                        enemy.sprite.setTint(0xff6666);
+                        enemy.sprite.clearTint();
                     }
                 });
             }

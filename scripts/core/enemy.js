@@ -27,8 +27,7 @@ export class Enemy {
     const sizeSpeedModifier = Math.max(0.5, 1 - (enemyData.size - 24) / 200);
     const randomSpeedVariation = 0.8 + Math.random() * 0.4;
   const speedDifficultyBonus = 1 + ((difficulty - 1) * 0.06);
-    const globalEnemySpeedBonus = 0; // will be additive if game sets it
-    this.speed = ((enemyData.baseSpeed * sizeSpeedModifier * randomSpeedVariation * speedDifficultyBonus) + globalEnemySpeedBonus) * 0.7;
+    this.speed = ((enemyData.baseSpeed * sizeSpeedModifier * randomSpeedVariation * speedDifficultyBonus) + (window.globalEnemySpeedBonus || 0)) * 0.7;
   this.health = Math.floor(enemyData.health * difficultyMultiplier * waveMult);
     this.maxHealth = this.health;
   this.damage = Math.floor(enemyData.damage * difficultyMultiplier * waveMult);
