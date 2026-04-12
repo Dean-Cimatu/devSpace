@@ -1,4 +1,52 @@
-/* Fonts */
+/* ─── Design tokens ──────────────────────────────────────────────────────── */
+:root {
+    --bg:              #0d0b09;
+    --surface:         rgba(20, 16, 12, 0.88);
+    --surface-raised:  rgba(28, 22, 16, 0.94);
+    --border:          rgba(175, 140, 60, 0.20);
+    --border-strong:   rgba(175, 140, 60, 0.50);
+
+    --gold:            #c9a450;
+    --gold-light:      #e0bb6a;
+    --crimson:         #7a1515;
+    --crimson-light:   #9b2020;
+
+    --text:            #ede9e1;
+    --text-dim:        rgba(237, 233, 225, 0.52);
+    --text-inverse:    #0d0b09;
+
+    --green:           #4a9e6b;
+    --red:             #c94040;
+    --blue:            #5b8fc9;
+
+    --radius-s:  4px;
+    --radius-m:  8px;
+    --radius-l:  14px;
+
+    --nav-h: 48px;
+    --font-display: 'Pickyside', 'Georgia', serif;
+    --font-ui:      'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ─── Reset & base ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    color: var(--text);
+    background-color: var(--bg);
+    background-image: url('../assets/background/HDcolosseum.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+/* ─── Fonts ──────────────────────────────────────────────────────────────── */
 @font-face {
     font-family: 'Pickyside';
     src: url('../assets/fonts/Pickyside.otf') format('opentype');
@@ -6,123 +54,222 @@
     font-style: normal;
 }
 
-/* Title */
-#title {
-    width: fit-content;
-    margin: 0 auto;
-    text-align: center;
-    font-family: 'Pickyside', 'JetBrains Mono', monospace;
-    color: white;
-}
-
-#title h1 {
-    font-size: 5em;
-    margin: 0;
-    font-family: 'Pickyside', 'JetBrains Mono', monospace;
-}
-
-#title p {
-    font-size: 1.5em;
-    margin: 5px 0 0 0;
-    font-family: 'Pickyside', 'JetBrains Mono', monospace;
-}
-
-/* Body */
-body {
-    font-family: 'Pickyside', monospace;
-    color: white;
-    margin: 0;
-    padding: 0;
-    background-color: black;
-    background-image: url('../assets/background/HDcolosseum.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    height: 100vh;
-    overflow: hidden;
-}
-
-/* Navigation */
+/* ─── Navigation ─────────────────────────────────────────────────────────── */
 #topNav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 5px 15px;
+    height: var(--nav-h);
     display: flex;
-    justify-content: left;
-    gap: 10px;
+    align-items: center;
+    gap: 4px;
+    padding: 0 20px;
+    background: rgba(10, 8, 6, 0.92);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
     z-index: 1000;
-    border-bottom: 1px solid gold;
 }
 
-#topNav a button {
-    font-family: 'Pickyside', monospace;
-    font-size: 0.75em;
-    padding: 5px 12px;
-    border: none;
-    border-radius: 4px;
-    background: gold;
-    color: black;
-    cursor: pointer;
-    transition: background 0.2s;
+#topNav .nav-link {
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: var(--radius-s);
+    transition: color 0.15s, background 0.15s;
 }
 
-#topNav a button:hover {
-    background: maroon;
+#topNav .nav-link:hover {
+    color: var(--gold-light);
+    background: rgba(175, 140, 60, 0.10);
 }
 
-/* Content */
+#topNav .nav-link.active {
+    color: var(--gold);
+}
+
+/* ─── Page layout ────────────────────────────────────────────────────────── */
 .main-content {
-    margin-top: 35px;
-    height: calc(100vh - 35px);
+    margin-top: var(--nav-h);
+    height: calc(100vh - var(--nav-h));
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
+    padding: 24px 16px;
 }
 
-/* Menu */
-#mainMenu {
-    width: 375px;
-    margin: 50px auto;
-    padding: 25px;
-    background: rgba(0,0,0,0.6);
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+/* ─── Brand title ────────────────────────────────────────────────────────── */
+#title {
     text-align: center;
+    margin-bottom: 28px;
 }
 
-#mainMenu button {
-    width: 80%;
-    margin: 12.5px 0;
-    padding: 12.5px;
-    font-size: 1.375em;
+#title h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 6vw, 4.8rem);
+    margin: 0;
+    color: var(--gold);
+    text-shadow: 0 2px 20px rgba(201, 164, 80, 0.35);
+    letter-spacing: 0.02em;
+}
+
+#title p {
+    font-family: var(--font-ui);
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--text-dim);
+    margin: 8px 0 0;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* ─── Card / panel ───────────────────────────────────────────────────────── */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* ─── Main menu ──────────────────────────────────────────────────────────── */
+#mainMenu {
+    width: 320px;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+}
+
+#mainMenu a {
+    width: 100%;
+    text-decoration: none;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 11px 20px;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     border: none;
-    border-radius: 7.5px;
-    background: gold;
-    color: black;
+    border-radius: var(--radius-m);
     cursor: pointer;
-    transition: background 0.2s;
-    font-family: 'Pickyside', monospace;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--gold);
+    color: var(--text-inverse);
+    box-shadow: 0 2px 8px rgba(201, 164, 80, 0.25);
+}
+
+.btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(201, 164, 80, 0.35);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border-strong);
+}
+
+.btn-ghost:hover {
+    color: var(--text);
+    border-color: var(--gold);
+    background: rgba(175, 140, 60, 0.08);
+}
+
+.btn-danger {
+    background: var(--crimson);
+    color: var(--gold-light);
+    border: 1px solid rgba(175, 140, 60, 0.3);
+}
+
+.btn-danger:hover {
+    background: var(--crimson-light);
+    transform: translateY(-1px);
+}
+
+/* Legacy selectors kept for compatibility */
+#mainMenu button {
+    width: 100%;
+    padding: 11px 20px;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: var(--radius-m);
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    background: var(--gold);
+    color: var(--text-inverse);
 }
 
 #mainMenu button:hover {
-    background: maroon;
+    background: var(--gold-light);
+    transform: translateY(-1px);
 }
 
-/* Forms */
-#registerForm, #loginForm {
-    width: 375px;
-    margin: 25px auto;
-    padding: 25px;
-    background: rgba(0,0,0,0.6);
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    font-family: 'Pickyside', monospace;
+/* ─── Forms ──────────────────────────────────────────────────────────────── */
+#registerForm,
+#loginForm {
+    width: min(400px, 94vw);
+    padding: 36px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+}
+
+#registerForm h2,
+#loginForm h2 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--gold);
+    text-align: center;
+    margin: 0 0 28px;
+    letter-spacing: 0.04em;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
 }
 
 #registerForm input[type="text"],
@@ -132,151 +279,323 @@ body {
 #loginForm input[type="text"],
 #loginForm input[type="password"] {
     width: 100%;
-    padding: 8px 10px;
-    margin: 4px 0 10px 0;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid gold;
-    border-radius: 5px;
-    color: white;
-    font-family: 'Pickyside', monospace;
-    font-size: 0.9em;
-    box-sizing: border-box;
-}
-
-#registerForm input[type="text"]:focus,
-#registerForm input[type="email"]:focus,
-#registerForm input[type="password"]:focus,
-#registerForm input[type="date"]:focus,
-#loginForm input[type="text"]:focus,
-#loginForm input[type="password"]:focus {
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-m);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 0.92rem;
+    transition: border-color 0.15s, background 0.15s;
     outline: none;
-    border-color: white;
-    background: rgba(255,255,255,0.15);
 }
 
-#registerForm label,
-#loginForm label {
-    font-size: 0.85em;
-    color: rgba(255,255,255,0.8);
+#registerForm input:focus,
+#loginForm input:focus {
+    border-color: var(--gold);
+    background: rgba(201, 164, 80, 0.06);
 }
 
-#registerForm input[type="submit"], #loginForm input[type="submit"] {
-    font-family: 'Pickyside', monospace;
-    font-size: 1;
-    padding: 10px 20px;
-    background: gold;
-    color: black;
+#registerForm input[type="date"] {
+    color-scheme: dark;
+}
+
+#registerForm button[type="submit"],
+#loginForm button[type="submit"],
+#registerForm input[type="submit"],
+#loginForm input[type="submit"] {
+    width: 100%;
+    padding: 12px 20px;
+    margin-top: 8px;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--gold);
+    color: var(--text-inverse);
     border: none;
-    border-radius: 7.5px;
+    border-radius: var(--radius-m);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.15s, transform 0.1s;
 }
 
-#registerForm input[type="submit"]:hover, #loginForm input[type="submit"]:hover {
-    background: maroon;
+#registerForm button[type="submit"]:hover,
+#loginForm button[type="submit"]:hover,
+#registerForm input[type="submit"]:hover,
+#loginForm input[type="submit"]:hover {
+    background: var(--gold-light);
+    transform: translateY(-1px);
 }
 
-/* Leaderboard */
-#leaderboard {
-    width: min(650px, 95vw);
-    margin: 20px auto;
-    padding: 20px;
-    background: rgba(0,0,0,0.55);
-    border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+#registerForm button[type="submit"]:disabled,
+#loginForm button[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
 }
 
-/* Links */
-#registerForm a, #loginForm a {
-    font-family: 'Pickyside', monospace;
-    color: gold;
+.form-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.83rem;
+    color: var(--text-dim);
+}
+
+.form-footer a {
+    color: var(--gold);
     text-decoration: none;
-    font-weight: bold;
-    transition: color 0.2s;
+    font-weight: 600;
 }
 
-#registerForm a:hover, #loginForm a:hover {
-    color: maroon;
+.form-footer a:hover {
+    color: var(--gold-light);
     text-decoration: underline;
 }
 
-body > a[href="index.html"] {
-    display: inline-block;
-    font-family: 'Pickyside', monospace;
-    font-size: 1.1em;
-    padding: 10px 20px;
-    margin: 20px;
-    background: rgba(139, 0, 0, 0.8);
-    color: gold;
-    text-decoration: none;
-    border-radius: 7.5px;
-    border: 2px solid gold;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-
-body > a[href="index.html"]:hover {
-    background: gold;
-    color: maroon;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-}
-
-body > h1 {
+/* Auth messages */
+.auth-message {
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    border-radius: var(--radius-m);
+    font-size: 0.85rem;
+    font-weight: 500;
     text-align: center;
-    font-family: 'Pickyside', monospace;
-    color: white;
-    margin: 20px 0;
-    font-size: 2.5em;
 }
 
-/* Game */
-body.game-page {
-    margin: 0;
+.auth-message.success { background: rgba(74, 158, 107, 0.2); border: 1px solid var(--green); color: #7dcca0; }
+.auth-message.error   { background: rgba(201, 64, 64, 0.2);  border: 1px solid var(--red);   color: #e07070; }
+.auth-message.info    { background: rgba(91, 143, 201, 0.2); border: 1px solid var(--blue);  color: #88b4e0; }
+
+/* ─── Page headings (standalone h1) ──────────────────────────────────────── */
+.page-heading {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    color: var(--gold);
+    text-align: center;
+    margin: 0 0 24px;
+    letter-spacing: 0.03em;
+}
+
+/* ─── Leaderboard ────────────────────────────────────────────────────────── */
+#leaderboard {
+    width: min(680px, 96vw);
     padding: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
     overflow: hidden;
 }
 
-body.game-page #topNav {
-    height: 50px;
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-ui);
 }
 
+.leaderboard-table thead th {
+    padding: 14px 16px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid var(--border-strong);
+    text-align: center;
+}
+
+.leaderboard-table tbody td {
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+}
+
+.leaderboard-table tbody tr:last-child td { border-bottom: none; }
+.leaderboard-table tbody tr:hover { background: rgba(175, 140, 60, 0.06); }
+.leaderboard-table .top-three { background: rgba(201, 164, 80, 0.07); }
+
+.leaderboard-table .rank        { font-weight: 700; font-size: 1rem; }
+.leaderboard-table .rank.top    { font-size: 1.2rem; }
+.leaderboard-table .username    { font-weight: 600; }
+.leaderboard-table .score       { color: var(--green); font-weight: 700; }
+.leaderboard-table .wave        { color: var(--blue); }
+.leaderboard-table .date        { color: var(--text-dim); font-size: 0.8rem; }
+
+/* ─── Welcome panel (home page, logged-in state) ─────────────────────────── */
+.game-layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 24px;
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+}
+
+.welcome-panel {
+    width: 320px;
+    padding: 28px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+    font-family: var(--font-ui);
+}
+
+.welcome-header {
+    text-align: center;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-strong);
+}
+
+.welcome-header h2 {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 0 0 6px;
+}
+
+.welcome-header h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin: 0;
+    letter-spacing: 0.04em;
+}
+
+.player-stats { margin-bottom: 20px; }
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.stat-item:last-child { border-bottom: none; }
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.user-actions { padding-top: 16px; }
+
+.logout-btn {
+    width: 100%;
+    padding: 10px;
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: var(--radius-m);
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border-strong);
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.logout-btn:hover {
+    color: var(--red);
+    border-color: var(--red);
+    background: rgba(201, 64, 64, 0.08);
+}
+
+@media (max-width: 720px) {
+    .game-layout {
+        flex-direction: column;
+        align-items: center;
+    }
+    .welcome-panel { width: min(320px, 100%); }
+}
+
+/* ─── Game page ──────────────────────────────────────────────────────────── */
+body.game-page { overflow: hidden; }
+
 body.game-page .main-content {
-    margin-top: 50px;
-    height: calc(100vh - 50px);
+    margin-top: var(--nav-h);
+    height: calc(100vh - var(--nav-h));
     padding: 0;
 }
 
 #gameContainer {
     width: 100vw;
-    height: calc(100vh - 50px);
-    margin: 0;
-    border: none;
-    background-color: black;
+    height: calc(100vh - var(--nav-h));
+    background: #000;
 }
 
 .game-instructions {
     position: fixed;
-    bottom: 10px;
+    bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
-    color: white;
-    font-family: 'Pickyside', monospace;
-    background: rgba(0, 0, 0, 0.8);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    background: var(--surface);
     padding: 10px 20px;
-    border-radius: 10px;
-    border: 2px solid gold;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--border);
     z-index: 999;
+    backdrop-filter: blur(8px);
 }
 
 .game-instructions h2 {
-    color: gold;
-    margin: 0 0 5px 0;
-    font-size: 1.2em;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    color: var(--gold);
+    margin: 0 0 4px;
 }
 
 .game-instructions p {
     margin: 2px 0;
-    font-size: 0.9em;
+    color: var(--text-dim);
+}
+
+/* ─── Back link (used on some sub-pages) ─────────────────────────────────── */
+body > a[href="/"],
+body > a[href="index.html"] {
+    display: inline-block;
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    margin: 20px;
+    background: transparent;
+    color: var(--text-dim);
+    text-decoration: none;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--border-strong);
+    transition: color 0.15s, border-color 0.15s;
+}
+
+body > a[href="/"]:hover,
+body > a[href="index.html"]:hover {
+    color: var(--gold);
+    border-color: var(--gold);
 }

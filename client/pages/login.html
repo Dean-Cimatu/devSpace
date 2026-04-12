@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Colosseum Fighters</title>
+    <title>Login — Colosseum Fighters</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/auth.js"></script>
     <script src="/js/navigation.js"></script>
@@ -11,25 +14,29 @@
     <script src="/js/login.js"></script>
 </head>
 <body>
-    <div id="topNav">
-        <a href="/"><button>Home</button></a>
-        <a href="/pages/game.html"><button>Play</button></a>
-        <a href="/pages/register.html"><button>Register</button></a>
-        <a href="/pages/login.html"><button>Login</button></a>
-        <a href="/pages/leaderboard.html"><button>Leaderboard</button></a>
-    </div>
+    <nav id="topNav">
+        <a href="/"                        class="nav-link">Home</a>
+        <a href="/pages/game.html"         class="nav-link">Play</a>
+        <a href="/pages/register.html"     class="nav-link">Register</a>
+        <a href="/pages/login.html"        class="nav-link active">Login</a>
+        <a href="/pages/leaderboard.html"  class="nav-link">Leaderboard</a>
+    </nav>
 
     <div class="main-content">
-        <h1>Login</h1>
         <div id="loginForm">
-            <form id="loginFormElement">
-                <label for="username">Username:</label><br>
-                <input type="text" id="username" name="username" required><br>
-                <label for="password">Password:</label><br>
-                <input type="password" id="password" name="password" required><br><br>
-                <input type="submit" value="Login">
+            <h2>Sign In</h2>
+            <form id="loginFormElement" novalidate>
+                <div class="form-group">
+                    <label for="username">Username or email</label>
+                    <input type="text" id="username" name="username" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+                <button type="submit">Sign In</button>
             </form>
-            <p>Don't have an account? <a href="/pages/register.html">Register here</a></p>
+            <p class="form-footer">Don't have an account? <a href="/pages/register.html">Register</a></p>
         </div>
     </div>
 </body>

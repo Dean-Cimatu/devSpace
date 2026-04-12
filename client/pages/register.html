@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Colosseum Fighters</title>
+    <title>Register — Colosseum Fighters</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/auth.js"></script>
     <script src="/js/navigation.js"></script>
@@ -11,29 +14,39 @@
     <script src="/js/register.js"></script>
 </head>
 <body>
-    <div id="topNav">
-        <a href="/"><button>Home</button></a>
-        <a href="/pages/game.html"><button>Play</button></a>
-        <a href="/pages/register.html"><button>Register</button></a>
-        <a href="/pages/login.html"><button>Login</button></a>
-        <a href="/pages/leaderboard.html"><button>Leaderboard</button></a>
-    </div>
+    <nav id="topNav">
+        <a href="/"                        class="nav-link">Home</a>
+        <a href="/pages/game.html"         class="nav-link">Play</a>
+        <a href="/pages/register.html"     class="nav-link active">Register</a>
+        <a href="/pages/login.html"        class="nav-link">Login</a>
+        <a href="/pages/leaderboard.html"  class="nav-link">Leaderboard</a>
+    </nav>
 
     <div class="main-content">
-        <h1>Register</h1>
         <div id="registerForm">
-            <form id="registerFormElement">
-                <label for="username">Username:</label><br>
-                <input type="text" id="username" name="username" required><br>
-                <label for="email">Email:</label><br>
-                <input type="email" id="email" name="email" required><br>
-                <label for="DateOfBirth">Date of Birth:</label><br>
-                <input type="date" id="DateOfBirth" name="DateOfBirth" required><br>
-                <label for="password">Password:</label><br>
-                <input type="password" id="password" name="password" required><br><br>
-                <input type="submit" value="Register">
+            <h2>Create Account</h2>
+            <form id="registerFormElement" novalidate>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" autocomplete="username"
+                           minlength="3" maxlength="20" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="DateOfBirth">Date of birth</label>
+                    <input type="date" id="DateOfBirth" name="DateOfBirth" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password"
+                           autocomplete="new-password" minlength="6" required>
+                </div>
+                <button type="submit">Create Account</button>
             </form>
-            <p>Already have an account? <a href="/pages/login.html">Login here</a></p>
+            <p class="form-footer">Already have an account? <a href="/pages/login.html">Sign in</a></p>
         </div>
     </div>
 </body>

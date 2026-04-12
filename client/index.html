@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Colosseum Fighters</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/auth.js"></script>
     <script src="/js/navigation.js"></script>
@@ -11,13 +14,13 @@
     <script src="/js/main.js"></script>
 </head>
 <body>
-    <div id="topNav">
-        <a href="/"><button>Home</button></a>
-        <a href="/pages/game.html"><button>Play</button></a>
-        <a href="/pages/register.html"><button>Register</button></a>
-        <a href="/pages/login.html"><button>Login</button></a>
-        <a href="/pages/leaderboard.html"><button>Leaderboard</button></a>
-    </div>
+    <nav id="topNav">
+        <a href="/"                        class="nav-link active">Home</a>
+        <a href="/pages/game.html"         class="nav-link">Play</a>
+        <a href="/pages/register.html"     class="nav-link">Register</a>
+        <a href="/pages/login.html"        class="nav-link">Login</a>
+        <a href="/pages/leaderboard.html"  class="nav-link">Leaderboard</a>
+    </nav>
 
     <div class="main-content">
         <div id="title">
@@ -25,8 +28,8 @@
             <p>Survive endless waves — how long can you last?</p>
         </div>
         <div id="mainMenu">
-            <a href="/pages/game.html"><button>Play Game</button></a><br>
-            <a href="/pages/leaderboard.html"><button>Leaderboard</button></a><br>
+            <a href="/pages/game.html"><button class="btn btn-primary">Play Game</button></a>
+            <a href="/pages/leaderboard.html"><button class="btn btn-ghost">Leaderboard</button></a>
         </div>
     </div>
 </body>

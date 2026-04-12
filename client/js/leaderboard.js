@@ -60,7 +60,6 @@ async function loadLeaderboard() {
             <tbody>${rows}</tbody>
         </table>`;
 
-    injectLeaderboardStyles();
 }
 
 function escapeHtml(str) {
@@ -69,45 +68,4 @@ function escapeHtml(str) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
-}
-
-function injectLeaderboardStyles() {
-    if (document.getElementById('leaderboard-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'leaderboard-styles';
-    style.textContent = `
-        #leaderboard { max-width: 650px; margin: 0 auto; }
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-family: 'Pickyside', monospace;
-            background: rgba(0,0,0,0.7);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .leaderboard-table th {
-            background: rgba(128,0,0,0.85);
-            color: gold;
-            padding: 14px 12px;
-            text-align: center;
-            border-bottom: 2px solid gold;
-            font-size: 0.95em;
-        }
-        .leaderboard-table td {
-            padding: 11px 12px;
-            text-align: center;
-            color: white;
-            border-bottom: 1px solid rgba(255,215,0,0.25);
-            font-size: 0.9em;
-        }
-        .leaderboard-table tr:hover { background: rgba(255,215,0,0.08); }
-        .leaderboard-table .top-three { background: rgba(255,215,0,0.12); }
-        .leaderboard-table .rank { font-weight: bold; font-size: 1.1em; }
-        .leaderboard-table .rank.top { font-size: 1.3em; }
-        .leaderboard-table .username { font-weight: bold; }
-        .leaderboard-table .score { color: #90EE90; font-weight: bold; }
-        .leaderboard-table .wave { color: #88ccff; }
-        .leaderboard-table .date { color: rgba(255,255,255,0.55); font-size: 0.8em; }
-    `;
-    document.head.appendChild(style);
 }

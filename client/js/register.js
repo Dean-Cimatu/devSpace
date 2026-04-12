@@ -2,44 +2,50 @@ document.addEventListener('DOMContentLoaded', function () {
     const dobInput = document.getElementById('DateOfBirth');
     if (dobInput) {
         const today = new Date();
-        dobInput.max = new Date(today.getFullYear() - 13, today.getMonth(), today.getDate()).toISOString().split('T')[0];
+        dobInput.max = new Date(today.getFullYear() - 13,  today.getMonth(), today.getDate()).toISOString().split('T')[0];
         dobInput.min = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate()).toISOString().split('T')[0];
         dobInput.required = true;
     }
 
     const registerForm = document.querySelector('#registerForm form');
-    if (registerForm) {
-        registerForm.addEventListener('submit', function (e) {
-            e.preventDefault();
+    if (!registerForm) return;
 
-            const formData = {
-                username:    document.getElementById('username').value,
-                email:       document.getElementById('email').value,
-                password:    document.getElementById('password').value,
-                dateOfBirth: document.getElementById('DateOfBirth').value
-            };
+    registerForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
 
-            const dob = new Date(formData.dateOfBirth);
-            const today = new Date();
-            if (!formData.dateOfBirth || isNaN(dob.getTime())) {
-                displayMessage('Please enter a valid date of birth.', 'error'); return;
-            }
-            if (dob > today) {
-                displayMessage('Date of birth cannot be in the future.', 'error'); return;
-            }
-            if (dob > new Date(today.getFullYear() - 13, today.getMonth(), today.getDate())) {
-                displayMessage('You must be at least 13 years old to register.', 'error'); return;
-            }
+        const formData = {
+            username:    document.getElementById('username').value,
+            email:       document.getElementById('email').value,
+            password:    document.getElementById('password').value,
+            dateOfBirth: document.getElementById('DateOfBirth').value
+        };
 
-            const result = auth.register(formData);
-            displayMessage(result.message, result.success ? 'success' : 'error');
+        // Client-side age check so we don't make a round-trip for obvious failures
+        const dob   = new Date(formData.dateOfBirth);
+        const today = new Date();
+        if (!formData.dateOfBirth || isNaN(dob.getTime())) {
+            displayMessage('Please enter a valid date of birth.', 'error'); return;
+        }
+        if (dob > today) {
+            displayMessage('Date of birth cannot be in the future.', 'error'); return;
+        }
+        if (dob > new Date(today.getFullYear() - 13, today.getMonth(), today.getDate())) {
+            displayMessage('You must be at least 13 years old to register.', 'error'); return;
+        }
 
-            if (result.success) {
-                registerForm.reset();
-                setTimeout(() => { window.location.href = '/pages/login.html'; }, 2000);
-            }
-        });
-    }
+        const submitBtn = registerForm.querySelector('button[type="submit"]') || registerForm.querySelector('button');
+        if (submitBtn) submitBtn.disabled = true;
+
+        const result = await auth.register(formData);
+        displayMessage(result.message, result.success ? 'success' : 'error');
+
+        if (result.success) {
+            registerForm.reset();
+            setTimeout(() => { window.location.href = '/'; }, 2000);
+        } else {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    });
 });
 
 function displayMessage(message, type = 'info') {
