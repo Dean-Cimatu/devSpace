@@ -51,6 +51,8 @@ export class WeaponEntity extends Entity {
         });
 
         const orbitObj = { angle: this.startOrbitAngle };
+        this._lastGhostAngle = this.startOrbitAngle;
+
         this._orbitTween = this.scene.tweens.add({
             targets:  orbitObj,
             angle:    this.endOrbitAngle,
@@ -60,6 +62,17 @@ export class WeaponEntity extends Entity {
                 if (!this.isAlive || !this.sprite) return;
                 this.currentOrbitAngle = orbitObj.angle;
                 this._position();
+                // Ghost trail: drop a fading copy every ~25° of arc for motion blur
+                if (Math.abs(orbitObj.angle - this._lastGhostAngle) > 0.44) {
+                    this._lastGhostAngle = orbitObj.angle;
+                    const ghost = this.scene.add.image(this.sprite.x, this.sprite.y, this.weaponData.sprite);
+                    ghost.setOrigin(0.15, 0.5)
+                         .setScale(this.sprite.scaleX)
+                         .setRotation(this.sprite.rotation)
+                         .setDepth(48)
+                         .setAlpha(0.30);
+                    this.scene.tweens.add({ targets: ghost, alpha: 0, duration: 110, onComplete: () => ghost.destroy() });
+                }
             },
             onComplete: () => {
                 this._tweenDone = true;

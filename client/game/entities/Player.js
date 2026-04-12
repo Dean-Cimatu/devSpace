@@ -54,43 +54,59 @@ export class Player extends Entity {
     // ─── UI ────────────────────────────────────────────────────────────────────
 
     createUI() {
-        this.hpBarBg   = this.scene.add.rectangle(0, 0, 60, 8, 0x000000);
-        this.hpBarFill = this.scene.add.rectangle(0, 0, 60, 8, 0x00ff00);
+        const px = this.sprite.x, py = this.sprite.y - 50;
+        this.hpBarBg   = this.scene.add.rectangle(px, py, 60, 8, 0x000000);
+        this.hpBarFill = this.scene.add.rectangle(px - 30, py, 60, 8, 0x44dd44);
         this.hpBarBg.setDepth(999);
-        this.hpBarFill.setDepth(1000);
+        this.hpBarFill.setDepth(1000).setOrigin(0, 0.5);
         this.hpBarBg.setVisible(true);
         this.hpBarFill.setVisible(true);
         this.scene.time.delayedCall(50, () => { this.updateHPBar(); });
 
-        const textStyle = (color) => ({
-            fontSize: '16px', fill: color, stroke: '#000000', strokeThickness: 2,
-            fontFamily: '"Inter", "Roboto", sans-serif'
+        // HUD panel background — sits behind all stat text
+        this._hudPanel = this.scene.add.rectangle(8, 62, 200, 148, 0x000000, 0.55);
+        this._hudPanel.setScrollFactor(0).setDepth(998).setOrigin(0, 0);
+        this._hudPanel.setStrokeStyle(1, 0x4a3a18, 0.6);
+
+        const statStyle = (color = '#ede9e1') => ({
+            fontSize: '13px', fill: color, stroke: '#000000', strokeThickness: 2,
+            fontFamily: '"Inter", system-ui, sans-serif', fontStyle: 'normal'
         });
-        this.levelText     = this.scene.add.text(16,  82, `Level: ${this.level}`,  textStyle('#ffffff'));
-        this.killCountText = this.scene.add.text(16, 102, `Kills: ${this.killCount}`, textStyle('#00ff00'));
-        this.waveText      = this.scene.add.text(16, 122, `Wave: 1`,               textStyle('#88ccff'));
-        this.scoreText     = this.scene.add.text(16, 142, `Score: 0`,              textStyle('#ffdd44'));
-        [this.levelText, this.killCountText, this.waveText, this.scoreText].forEach(t => {
-            t.setScrollFactor(0).setDepth(1000);
-        });
+        const labelStyle = {
+            fontSize: '10px', fill: 'rgba(237,233,225,0.50)', stroke: '#000000', strokeThickness: 1,
+            fontFamily: '"Inter", system-ui, sans-serif', fontStyle: 'normal',
+            letterSpacing: 1
+        };
+
+        // Row 1: Wave
+        this.scene.add.text(16, 68, 'WAVE', labelStyle).setScrollFactor(0).setDepth(1000);
+        this.waveText = this.scene.add.text(16, 80, '1', statStyle('#5b8fc9')).setScrollFactor(0).setDepth(1000);
+
+        // Row 2: Score
+        this.scene.add.text(16, 100, 'SCORE', labelStyle).setScrollFactor(0).setDepth(1000);
+        this.scoreText = this.scene.add.text(16, 112, '0', statStyle('#c9a450')).setScrollFactor(0).setDepth(1000);
+
+        // Row 3: Level + Kills side by side
+        this.scene.add.text(16, 132, 'LEVEL', labelStyle).setScrollFactor(0).setDepth(1000);
+        this.scene.add.text(90, 132, 'KILLS', labelStyle).setScrollFactor(0).setDepth(1000);
+        this.levelText     = this.scene.add.text(16, 144, `${this.level}`,  statStyle()).setScrollFactor(0).setDepth(1000);
+        this.killCountText = this.scene.add.text(90, 144, `${this.killCount}`, statStyle()).setScrollFactor(0).setDepth(1000);
+
+        // Timer
+        this.scene.add.text(16, 164, 'TIME', labelStyle).setScrollFactor(0).setDepth(1000);
+        this.scene.gameTimer = 0;
+        this.timerText = this.scene.add.text(16, 176, '0s', statStyle('rgba(237,233,225,0.70)')).setScrollFactor(0).setDepth(1000);
 
         this.createInventoryUI();
 
-        this.scene.gameTimer = 0;
-        this.timerText = this.scene.add.text(16, 212, `Time: 0s`, {
-            fontSize: '14px', fill: '#aaaaaa', stroke: '#000000', strokeThickness: 2,
-            fontFamily: '"Inter", "Roboto", sans-serif'
-        });
-        this.timerText.setScrollFactor(0).setDepth(1000);
-
         const screenWidth = this.scene.cameras.main.width;
-        this.xpBarBg = this.scene.add.rectangle(screenWidth / 2, 20, screenWidth - 40, 20, 0x000000);
-        this.xpBarBg.setScrollFactor(0).setDepth(1000);
-        this.xpBar = this.scene.add.rectangle(screenWidth / 2, 20, screenWidth - 40, 20, 0x00ff00);
-        this.xpBar.setScrollFactor(0).setDepth(1001);
+        this.xpBarBg = this.scene.add.rectangle(20, 20, screenWidth - 40, 14, 0x000000);
+        this.xpBarBg.setScrollFactor(0).setDepth(1000).setOrigin(0, 0.5);
+        this.xpBar = this.scene.add.rectangle(20, 20, screenWidth - 40, 14, 0x4488ff);
+        this.xpBar.setScrollFactor(0).setDepth(1001).setOrigin(0, 0.5);
         this.xpBar.scaleX = 0;
         this.xpText = this.scene.add.text(screenWidth / 2, 20, `XP: ${this.experience}/${this.experienceToNext}`, {
-            fontSize: '14px', fill: '#ffffff', stroke: '#000000', strokeThickness: 2,
+            fontSize: '12px', fill: '#ffffff', stroke: '#000000', strokeThickness: 2,
             fontFamily: '"Inter", "Roboto", sans-serif'
         });
         this.xpText.setOrigin(0.5).setScrollFactor(0).setDepth(1002);
@@ -99,7 +115,7 @@ export class Player extends Entity {
             delay: 1000,
             callback: () => {
                 this.scene.gameTimer++;
-                this.timerText.setText(`Time: ${this.scene.gameTimer}s`);
+                this.timerText.setText(`${this.scene.gameTimer}s`);
             },
             loop: true
         });
@@ -153,9 +169,12 @@ export class Player extends Entity {
             const hpBarY = this.sprite.y - 50;
             this.hpBarBg.x   = this.sprite.x;
             this.hpBarBg.y   = hpBarY;
-            this.hpBarFill.x = this.sprite.x;
+            this.hpBarFill.x = this.sprite.x - 30;
             this.hpBarFill.y = hpBarY;
-            this.hpBarFill.scaleX = this.currentHealth / this.maxHealth;
+            const hp = this.currentHealth / this.maxHealth;
+            this.hpBarFill.scaleX = hp;
+            const color = hp > 0.5 ? 0x44dd44 : hp > 0.25 ? 0xddaa22 : 0xdd2222;
+            this.hpBarFill.setFillStyle(color);
             this.hpBarBg.setVisible(true);
             this.hpBarFill.setVisible(true);
         }
@@ -165,12 +184,11 @@ export class Player extends Entity {
         this.updateHPBar();
         const xpPercent = this.experience / this.experienceToNext;
         this.xpBar.scaleX = xpPercent;
-        this.xpBar.x = (this.scene.cameras.main.width / 2) + ((this.scene.cameras.main.width - 40) * (xpPercent - 1) / 2);
-        this.xpText.setText(`XP: ${this.experience}/${this.experienceToNext}`);
-        this.levelText.setText(`Level: ${this.level}`);
-        this.killCountText.setText(`Kills: ${this.killCount}`);
-        if (this.waveText)  this.waveText.setText(`Wave: ${this.scene.currentWave}`);
-        if (this.scoreText) this.scoreText.setText(`Score: ${this.score.toLocaleString()}`);
+        this.xpText.setText(`XP  ${this.experience} / ${this.experienceToNext}`);
+        this.levelText.setText(`${this.level}`);
+        this.killCountText.setText(`${this.killCount}`);
+        if (this.waveText)  this.waveText.setText(`${this.scene.currentWave || 1}`);
+        if (this.scoreText) this.scoreText.setText(this.score.toLocaleString());
     }
 
     // ─── XP / Kill ─────────────────────────────────────────────────────────────
@@ -539,7 +557,7 @@ export class Player extends Entity {
                 selected.push(selectedItem);
             } else {
                 const fd = ITEM_TYPES['berry01blue'];
-                selected.push({ id: 'berry01blue', sprite: fd.sprite, name: fd.name, category: fd.category, rarity: fd.rarity, effects: { health: 20 }, description: '+20 Health' });
+                selected.push({ id: 'berry01blue', sprite: fd.sprite, name: fd.name, category: fd.category, rarity: fd.rarity, effects: { health: 20 }, description: '+20 Health', effectSummary: '+20 Health' });
             }
         }
         return selected;
@@ -624,8 +642,12 @@ export class Player extends Entity {
 
     getWeaponCooldown(weapon) {
         if (!weapon) return 1000;
-        if (!weapon.projectile) return (weapon.swingDuration || 1000) + (weapon.restAfterSwing || 1000);
-        return Math.max(200, Math.floor((weapon.attackSpeed || 800) * 100 / (100 + this.attackSpeed)));
+        const speedMult = 100 / (100 + (this.attackSpeed || 0));
+        if (!weapon.projectile) {
+            const base = (weapon.swingDuration || 1000) + (weapon.restAfterSwing || 1000);
+            return Math.max(400, Math.floor(base * speedMult));
+        }
+        return Math.max(200, Math.floor((weapon.attackSpeed || 800) * speedMult));
     }
 
     performContinuousAttackFor(weapon, target) {
@@ -776,14 +798,29 @@ export class Player extends Entity {
         const id   = target.id || `${target.sprite.x}_${target.sprite.y}`;
         if (now - (this.damageTextCooldowns.get(id) || 0) < 160) return;
         this.damageTextCooldowns.set(id, now);
-        const t = this.scene.add.text(target.sprite.x, target.sprite.y - 20, `${Math.floor(damage)}`, {
-            fontSize: '14px', fontFamily: '"Inter", system-ui, sans-serif', fill: '#ffffff',
-            stroke: '#000000', strokeThickness: 3, fontStyle: 'bold'
-        });
-        t.setDepth(1000);
+
+        const dmg = Math.floor(damage);
+        let fill = '#ffffff', fontSize = '13px', initScale = 1.1;
+        if (dmg >= 60)      { fill = '#ff6622'; fontSize = '19px'; initScale = 1.6; }
+        else if (dmg >= 25) { fill = '#ffdd44'; fontSize = '16px'; initScale = 1.3; }
+
+        const t = this.scene.add.text(
+            target.sprite.x + (Math.random() - 0.5) * 14,
+            target.sprite.y - 18,
+            `${dmg}`,
+            { fontSize, fontFamily: '"Inter", system-ui, sans-serif', fill, stroke: '#000000', strokeThickness: 3, fontStyle: 'bold' }
+        );
+        t.setDepth(1200).setOrigin(0.5).setScale(initScale);
+
+        // Pop down to normal scale, then float up and fade
         this.scene.tweens.add({
-            targets: t, y: target.sprite.y - 52, alpha: 0, duration: 620, ease: 'Quad.easeOut',
-            onComplete: () => t.destroy()
+            targets: t, scaleX: 0.85, scaleY: 0.85, duration: 90, ease: 'Sine.easeOut',
+            onComplete: () => {
+                this.scene.tweens.add({
+                    targets: t, y: target.sprite.y - 55, alpha: 0, duration: 520, ease: 'Quad.easeOut',
+                    onComplete: () => t.destroy()
+                });
+            }
         });
     }
 
@@ -958,32 +995,52 @@ export class Player extends Entity {
         const overlay = this.scene.add.rectangle(cam.centerX, cam.centerY, cam.width, cam.height, 0x000000, 0.82);
         overlay.setScrollFactor(0).setDepth(3000);
 
-        const gameOverText = this.scene.add.text(cam.centerX, cam.centerY - 130, 'GAME OVER', {
-            fontSize: '54px', fill: '#ff2222', stroke: '#000000', strokeThickness: 5, fontFamily: '"Pickyside", monospace'
+        const gameOverText = this.scene.add.text(cam.centerX, cam.centerY - 140, 'GAME OVER', {
+            fontSize: '56px', fill: '#c94040', stroke: '#000000', strokeThickness: 6,
+            fontFamily: '"Pickyside", Georgia, serif'
         });
         gameOverText.setOrigin(0.5).setScrollFactor(0).setDepth(3001);
 
-        const statsText = this.scene.add.text(cam.centerX, cam.centerY - 50, [
-            `Level: ${this.level}   |   Wave: ${wave}`,
-            `Kills: ${this.killCount}   |   Time: ${timeSec}s`,
-            ``,
-            `SCORE:  ${finalScore.toLocaleString()}`
-        ].join('\n'), { fontSize: '20px', fill: '#ffffff', stroke: '#000000', strokeThickness: 2, align: 'center', lineSpacing: 6 });
+        // Divider line
+        const divider = this.scene.add.rectangle(cam.centerX, cam.centerY - 98, 280, 1, 0x4a3a18, 0.8);
+        divider.setScrollFactor(0).setDepth(3001);
+
+        const statStyle = { fontSize: '15px', fill: '#ede9e1', stroke: '#000000', strokeThickness: 2,
+            fontFamily: '"Inter", system-ui, sans-serif', align: 'center', lineSpacing: 10 };
+        const statsText = this.scene.add.text(cam.centerX, cam.centerY - 60, [
+            `Wave ${wave}   ·   Level ${this.level}   ·   ${timeSec}s`,
+            `${this.killCount} enemies defeated`,
+        ].join('\n'), statStyle);
         statsText.setOrigin(0.5).setScrollFactor(0).setDepth(3001);
 
-        const makeBtn = (x, label) => {
-            const btn = this.scene.add.rectangle(x, cam.centerY + 110, 160, 48, 0x3a3a3a);
-            btn.setScrollFactor(0).setDepth(3001).setInteractive().setStrokeStyle(2, 0x888888);
-            const txt = this.scene.add.text(x, cam.centerY + 110, label, {
-                fontSize: '18px', fill: '#ffffff', fontFamily: '"Pickyside", monospace'
+        const scoreStyle = { fontSize: '34px', fill: '#c9a450', stroke: '#000000', strokeThickness: 4,
+            fontFamily: '"Pickyside", Georgia, serif' };
+        const scoreLabel = this.scene.add.text(cam.centerX, cam.centerY + 10, finalScore.toLocaleString(), scoreStyle);
+        scoreLabel.setOrigin(0.5).setScrollFactor(0).setDepth(3001);
+        const scoreSub = this.scene.add.text(cam.centerX, cam.centerY + 48, 'FINAL SCORE', {
+            fontSize: '10px', fill: 'rgba(237,233,225,0.50)', stroke: '#000000', strokeThickness: 1,
+            fontFamily: '"Inter", system-ui, sans-serif', letterSpacing: 3
+        });
+        scoreSub.setOrigin(0.5).setScrollFactor(0).setDepth(3001);
+
+        const makeBtn = (x, label, primary = false) => {
+            const fillColor  = primary ? 0xc9a450 : 0x1c160c;
+            const strokeColor = primary ? 0xc9a450 : 0x4a3a18;
+            const textColor  = primary ? '#0d0b09' : '#ede9e1';
+            const btn = this.scene.add.rectangle(x, cam.centerY + 100, 155, 44, fillColor);
+            btn.setScrollFactor(0).setDepth(3001).setInteractive().setStrokeStyle(1, strokeColor);
+            const txt = this.scene.add.text(x, cam.centerY + 100, label, {
+                fontSize: '13px', fill: textColor, fontFamily: '"Inter", system-ui, sans-serif',
+                fontStyle: 'bold', letterSpacing: 1
             });
             txt.setOrigin(0.5).setScrollFactor(0).setDepth(3002);
-            btn.on('pointerover', () => btn.setFillStyle(0x555555));
-            btn.on('pointerout',  () => btn.setFillStyle(0x3a3a3a));
+            const hoverFill = primary ? 0xe0bb6a : 0x28200e;
+            btn.on('pointerover', () => btn.setFillStyle(hoverFill));
+            btn.on('pointerout',  () => btn.setFillStyle(fillColor));
             return btn;
         };
-        const restartBtn = makeBtn(cam.centerX - 90, 'Play Again');
-        const homeBtn    = makeBtn(cam.centerX + 90, 'Main Menu');
+        const restartBtn = makeBtn(cam.centerX - 82, 'PLAY AGAIN', true);
+        const homeBtn    = makeBtn(cam.centerX + 82, 'MAIN MENU');
 
         const removeNameEntry = () => { const el = document.getElementById('cf-name-entry'); if (el) el.remove(); };
         const stopBgm = () => { if (this.scene.bgmMusic) { try { this.scene.bgmMusic.stop(); this.scene.bgmMusic.destroy(); } catch (_) {} this.scene.bgmMusic = null; } };
@@ -992,25 +1049,13 @@ export class Player extends Entity {
 
         const nameEntry = document.createElement('div');
         nameEntry.id = 'cf-name-entry';
-        nameEntry.style.cssText = `
-            position:fixed; left:50%; transform:translateX(-50%);
-            top:calc(50% + 30px); z-index:9999;
-            display:flex; flex-direction:column; align-items:center; gap:8px;
-            font-family:'Pickyside',monospace; color:white; text-align:center;
-        `;
         nameEntry.innerHTML = `
-            <p style="margin:0 0 4px;font-size:15px;color:gold;">Submit your score to the leaderboard:</p>
-            <div style="display:flex;gap:8px;align-items:center;">
-                <input id="cf-name-input" type="text" maxlength="16" placeholder="Your name (max 16)"
-                    style="font-family:'Pickyside',monospace;font-size:14px;padding:8px 12px;
-                           border-radius:5px;border:2px solid gold;background:rgba(0,0,0,0.85);
-                           color:white;width:190px;outline:none;">
-                <button id="cf-submit-btn"
-                    style="font-family:'Pickyside',monospace;font-size:14px;padding:8px 14px;
-                           background:gold;color:black;border:none;border-radius:5px;cursor:pointer;font-weight:bold;">
-                    Submit</button>
+            <p>Submit your score to the leaderboard</p>
+            <div class="cf-entry-row">
+                <input id="cf-name-input" type="text" maxlength="16" placeholder="Your name (max 16)" autocomplete="off">
+                <button id="cf-submit-btn">Submit</button>
             </div>
-            <p id="cf-submit-status" style="margin:0;font-size:13px;min-height:18px;"></p>
+            <span id="cf-submit-status"></span>
         `;
         document.body.appendChild(nameEntry);
 

@@ -42,6 +42,7 @@ export class Enemy {
       armorWeaken: { time: 0, mult: 1.15 }
     };
     this.direction = Math.random() * Math.PI * 2;
+    this._separationFrame = Math.floor(Math.random() * 4); // stagger per-enemy
     const shadowSize = Math.max(30, scaledSize * 0.6);
     this.collisionRadius = shadowSize * 0.75;
     this.hurtboxRadius = Math.max(25, scaledSize * 0.45);
@@ -69,10 +70,11 @@ export class Enemy {
     return true;
   }
   createHPBar() {
-    this.hpBarBg = this.scene.add.rectangle(0, -40, 50, 6, 0x000000);
+    const bx = this.sprite.x, by = this.sprite.y - 40;
+    this.hpBarBg = this.scene.add.rectangle(bx, by, 50, 6, 0x000000);
     this.hpBarBg.setDepth(999);
-    this.hpBarFill = this.scene.add.rectangle(0, -40, 50, 6, 0xff0000);
-    this.hpBarFill.setDepth(1000);
+    this.hpBarFill = this.scene.add.rectangle(bx - 25, by, 50, 6, 0x44dd44);
+    this.hpBarFill.setDepth(1000).setOrigin(0, 0.5);
   }
   createAnimations() {
     const animPrefix = this.enemyData.animations;
@@ -147,12 +149,15 @@ export class Enemy {
   }
   updateHPBar() {
     if (this.hpBarBg && this.hpBarFill) {
-      this.hpBarBg.x = this.sprite.x;
-      this.hpBarBg.y = this.sprite.y - 40;
-      this.hpBarFill.x = this.sprite.x;
-      this.hpBarFill.y = this.sprite.y - 40;
-      const healthPercent = this.health / this.maxHealth;
-      this.hpBarFill.scaleX = healthPercent;
+      const bx = this.sprite.x, by = this.sprite.y - 40;
+      this.hpBarBg.x  = bx;
+      this.hpBarBg.y  = by;
+      this.hpBarFill.x = bx - 25;
+      this.hpBarFill.y = by;
+      const hp = this.health / this.maxHealth;
+      this.hpBarFill.scaleX = hp;
+      const color = hp > 0.5 ? 0x44dd44 : hp > 0.25 ? 0xddaa22 : 0xdd2222;
+      this.hpBarFill.setFillStyle(color);
     }
   }
   updateDirectionToPlayer(playerRef, allEnemies) {
@@ -168,9 +173,12 @@ export class Enemy {
     }
     const angleToPlayer = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, p.sprite.x, p.sprite.y);
     let separationForceX = 0, separationForceY = 0;
-    const separationDistance = 60;
-    if (allEnemies && Array.isArray(allEnemies)) {
-      allEnemies.forEach(otherEnemy => {
+    // Only recalculate separation every 4 frames per enemy (staggered) to avoid O(n²) per frame
+    this._separationFrame = ((this._separationFrame || 0) + 1) % 4;
+    if (this._separationFrame === 0 && allEnemies && Array.isArray(allEnemies)) {
+      const separationDistance = 60;
+      for (let i = 0; i < allEnemies.length; i++) {
+        const otherEnemy = allEnemies[i];
         if (otherEnemy !== this && otherEnemy.isAlive) {
           const distance = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, otherEnemy.sprite.x, otherEnemy.sprite.y);
           if (distance < separationDistance && distance > 0) {
@@ -180,7 +188,12 @@ export class Enemy {
             separationForceY += Math.sin(angleAway) * separationStrength;
           }
         }
-      });
+      }
+      this._cachedSepX = separationForceX;
+      this._cachedSepY = separationForceY;
+    } else {
+      separationForceX = this._cachedSepX || 0;
+      separationForceY = this._cachedSepY || 0;
     }
     const playerForceX = Math.cos(angleToPlayer) * 0.7;
     const playerForceY = Math.sin(angleToPlayer) * 0.7;
@@ -251,14 +264,14 @@ export class Enemy {
     const flatRes = typeKey && this.resistances ? (this.resistances[typeKey] || 0) : 0;
     const scaled = Math.max(1, Math.floor(damage * mult) - flatRes);
     this.health -= scaled;
-    this.sprite.setTint(0xff4444);
-    this.scene.time.delayedCall(150, () => { if (this.isAlive && this.sprite) this.sprite.clearTint(); });
+    // White flash is more visible and cohesive with projectile hit effect
+    this.sprite.setTintFill(0xffffff);
+    this.scene.time.delayedCall(90, () => { if (this.isAlive && this.sprite) this.sprite.clearTint(); });
     if (this.health <= 0) this.die();
     this.updateHPBar();
   }
   die() {
     this.isAlive = false;
-    this.sprite.setTint(0x666666);
     if (this.sprite.body) this.sprite.setVelocity(0, 0);
 
     const giveXPTo = this.player || (this.scene && (this.scene.player || this.scene.playerRef));
@@ -271,11 +284,24 @@ export class Enemy {
 
     if (this.hpBarBg)   this.hpBarBg.destroy();
     if (this.hpBarFill) this.hpBarFill.destroy();
+
+    // White flash → brief scale pop → collapse
+    this.sprite.setTintFill(0xffffff);
     this.scene.tweens.add({
       targets: [this.sprite, this.shadow],
-      alpha: 0, scaleY: 0.1,
-      duration: 400,
-      onComplete: () => this.destroy()
+      scaleX: 1.25, scaleY: 1.25,
+      duration: 70,
+      ease: 'Sine.easeOut',
+      onComplete: () => {
+        if (this.sprite) this.sprite.setTint(0x888888);
+        this.scene.tweens.add({
+          targets: [this.sprite, this.shadow],
+          alpha: 0, scaleY: 0.05, scaleX: 0.8,
+          duration: 320,
+          ease: 'Cubic.easeIn',
+          onComplete: () => this.destroy()
+        });
+      }
     });
   }
 

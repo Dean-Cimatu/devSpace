@@ -4,10 +4,9 @@ async function loadLeaderboard() {
     const mainContent = document.querySelector('.main-content');
     if (!mainContent) return;
 
-    // Inject placeholder while fetching
     const wrapper = document.createElement('div');
     wrapper.id = 'leaderboard';
-    wrapper.innerHTML = '<p style="text-align:center;color:gold;font-family:Pickyside,monospace;">Loading scores...</p>';
+    wrapper.innerHTML = '<div class="lb-message">Loading scores…</div>';
     const h1 = mainContent.querySelector('h1');
     if (h1) h1.insertAdjacentElement('afterend', wrapper);
 
@@ -17,17 +16,15 @@ async function loadLeaderboard() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         scores = await res.json();
     } catch (err) {
-        wrapper.innerHTML = `<p style="text-align:center;color:#ff6666;font-family:Pickyside,monospace;">
-            Could not load scores — make sure the server is running.<br>
-            <small style="opacity:0.7">${err.message}</small>
-        </p>`;
+        wrapper.innerHTML = `<div class="lb-message error">
+            Could not load scores — make sure the server is running.
+            <small>${err.message}</small>
+        </div>`;
         return;
     }
 
     if (!Array.isArray(scores) || scores.length === 0) {
-        wrapper.innerHTML = `<p style="text-align:center;color:gold;font-family:Pickyside,monospace;">
-            No scores yet — be the first to play!
-        </p>`;
+        wrapper.innerHTML = `<div class="lb-message empty">No scores yet — be the first to play!</div>`;
         return;
     }
 

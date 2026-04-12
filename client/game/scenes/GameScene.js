@@ -7,13 +7,9 @@ import {
     maintainEnemyLimit as wavesMaintainEnemyLimit,
     startDifficultyProgression as wavesStartDifficulty
 } from '../systems/waves.js';
+import { CHUNK_SIZE, TILE_SIZE, RENDER_DISTANCE, MIN_WAVE_DURATION_MS, SHOW_WAVE_BANNER } from '../config.js';
 
-const DEBUG                = false;
-const SHOW_WAVE_BANNER     = false;
-const MIN_WAVE_DURATION_MS = 60000;
-const CHUNK_SIZE           = 32;
-const TILE_SIZE            = 48;
-const RENDER_DISTANCE      = 2;
+const DEBUG = false;
 
 export default class GameScene extends Phaser.Scene {
     constructor() {
@@ -39,8 +35,9 @@ export default class GameScene extends Phaser.Scene {
         this.GAME_STATE         = 'intro';
         this.gameTimer          = 0;
 
-        // Sync waveMultiplier to window so Enemy.js can read it
+        // Sync to window so Enemy.js can read these values
         window.waveMultiplier = this.waveMultiplier;
+        window.currentDifficulty = this.currentDifficulty;
         window.globalEnemySpeedBonus = 0;
 
         // Chunk state
@@ -167,6 +164,7 @@ export default class GameScene extends Phaser.Scene {
         const newDiff = this.getDifficultyLevel();
         if (newDiff > this.currentDifficulty) {
             this.currentDifficulty = newDiff;
+            window.currentDifficulty = this.currentDifficulty;
             this.maxEnemies = Math.min(10 + (this.currentDifficulty * 3), 40);
         }
         const diffStrength = Math.pow(2, Math.max(0, this.currentDifficulty - 1));

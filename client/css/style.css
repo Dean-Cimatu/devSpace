@@ -93,6 +93,43 @@ body {
     color: var(--gold);
 }
 
+/* ─── Nav user badge ─────────────────────────────────────────────────────── */
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.nav-username {
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+}
+
+.nav-logout-btn {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.nav-logout-btn:hover {
+    color: var(--red);
+    border-color: var(--red);
+    background: rgba(201, 64, 64, 0.08);
+}
+
 /* ─── Page layout ────────────────────────────────────────────────────────── */
 .main-content {
     margin-top: var(--nav-h);
@@ -574,6 +611,96 @@ body.game-page .main-content {
     margin: 2px 0;
     color: var(--text-dim);
 }
+
+/* ─── Game over score-entry overlay (HTML on top of Phaser canvas) ───────── */
+#cf-name-entry {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(50% + 40px);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background: rgba(13, 11, 9, 0.90);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-l);
+    padding: 20px 28px;
+    backdrop-filter: blur(12px);
+    min-width: 320px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+
+#cf-name-entry p {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+
+.cf-entry-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+#cf-name-input {
+    flex: 1;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    padding: 9px 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-m);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+#cf-name-input:focus { border-color: var(--gold); }
+
+#cf-submit-btn {
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 9px 18px;
+    background: var(--gold);
+    color: var(--text-inverse);
+    border: none;
+    border-radius: var(--radius-m);
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+}
+
+#cf-submit-btn:hover  { background: var(--gold-light); }
+#cf-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+#cf-submit-status {
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    min-height: 18px;
+    color: var(--text-dim);
+}
+
+/* ─── Leaderboard state messages ─────────────────────────────────────────── */
+.lb-message {
+    padding: 28px 24px;
+    text-align: center;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    color: var(--text-dim);
+}
+
+.lb-message.error { color: var(--red); }
+.lb-message.empty { color: var(--gold); }
+.lb-message small  { display: block; margin-top: 6px; opacity: 0.6; font-size: 0.75rem; }
 
 /* ─── Back link (used on some sub-pages) ─────────────────────────────────── */
 body > a[href="/"],

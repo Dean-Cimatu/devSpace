@@ -4,7 +4,8 @@
   "description": "Browser survival game — Phaser 3 frontend, Express/MongoDB leaderboard backend",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

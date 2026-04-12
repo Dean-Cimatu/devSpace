@@ -10,6 +10,10 @@ function lineDamage(scene, player, enemies, x, y, angle, length, width, damage, 
   g.beginPath(); g.moveTo(x, y); g.lineTo(endX, endY); g.strokePath();
   g.setDepth(90);
   scene.tweens.add({ targets: g, alpha: 0, duration: 140, ease: 'Sine.easeIn', onComplete: () => g.destroy() });
+  // Tip impact ring
+  const ring = scene.add.circle(endX, endY, 6, 0xffffff, 0.70);
+  ring.setDepth(91);
+  scene.tweens.add({ targets: ring, scaleX: 2.0, scaleY: 2.0, alpha: 0, duration: 180, ease: 'Sine.easeOut', onComplete: () => ring.destroy() });
   enemies.forEach(e => {
     if (!e.isAlive) return;
     // project point onto line and check distance to segment
@@ -33,8 +37,8 @@ function lineDamage(scene, player, enemies, x, y, angle, length, width, damage, 
 function coneDamage(scene, player, enemies, x, y, angle, radius, arcRadians, damage, damageType, sourceKey = 'melee', invulnMs = 140) {
   const start = angle - arcRadians/2, end = angle + arcRadians/2;
   const g = scene.add.graphics();
-  g.fillStyle(0xffffff, 0.22);
-  g.lineStyle(5, 0xffffff, 0.80);
+  g.fillStyle(0xffffff, 0.18);
+  g.lineStyle(4, 0xffffff, 0.75);
   g.beginPath();
   g.moveTo(x, y);
   g.arc(x, y, radius, start, end);
@@ -43,6 +47,10 @@ function coneDamage(scene, player, enemies, x, y, angle, radius, arcRadians, dam
   g.strokePath();
   g.setDepth(90);
   scene.tweens.add({ targets: g, alpha: 0, duration: 160, ease: 'Sine.easeIn', onComplete: () => g.destroy() });
+  // Impact pulse at swing origin
+  const ring = scene.add.circle(x, y, 7, 0xffffff, 0.75);
+  ring.setDepth(91);
+  scene.tweens.add({ targets: ring, scaleX: 2.2, scaleY: 2.2, alpha: 0, duration: 200, ease: 'Sine.easeOut', onComplete: () => ring.destroy() });
   enemies.forEach(e => {
     if (!e.isAlive) return;
     const ang = Phaser.Math.Angle.Between(x, y, e.sprite.x, e.sprite.y);

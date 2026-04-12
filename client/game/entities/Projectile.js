@@ -220,13 +220,20 @@ export class Projectile {
         this.isAlive = false;
         if (this.fireballTimer) this.fireballTimer.destroy();
         if (this.sprite) {
+            const px = this.sprite.x, py = this.sprite.y;
+            // Impact ring burst
+            const ring = this.scene.add.circle(px, py, 5, 0xffffff, 0.80);
+            ring.setDepth(52);
+            this.scene.tweens.add({ targets: ring, scaleX: 3.5, scaleY: 3.5, alpha: 0, duration: 220, ease: 'Sine.easeOut', onComplete: () => ring.destroy() });
+            // Sprite pops outward then vanishes
             const proj = this.sprite;
             this.scene.tweens.add({
                 targets: proj,
                 alpha: 0,
-                scaleX: proj.scaleX * 0.9,
-                scaleY: proj.scaleY * 0.9,
-                duration: 120,
+                scaleX: proj.scaleX * 1.5,
+                scaleY: proj.scaleY * 1.5,
+                duration: 130,
+                ease: 'Sine.easeOut',
                 onComplete: () => { if (proj && proj.destroy) proj.destroy(); }
             });
             this.sprite = null;
