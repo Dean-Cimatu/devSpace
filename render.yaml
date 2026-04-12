@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: colosseum-fighters
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false   # set this manually in the Render dashboard

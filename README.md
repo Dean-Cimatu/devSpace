@@ -6,16 +6,22 @@ Built with **Phaser 3** (frontend) and **Express + MongoDB** (backend).
 
 ---
 
+## Play it live
+
+> Deploy your own instance in minutes — see the [Deployment](#deployment) section below.
+
+---
+
 ## How it works
 
-The Express server (`server.js`) does two things:
+The Express server (`server/index.js`) does two things:
 
-1. Serves the entire repo as static files — so opening `http://localhost:3000` loads the game
+1. Serves the entire `client/` directory as static files — opening `http://localhost:3000` loads the game
 2. Exposes two API endpoints for the leaderboard:
    - `GET /api/scores` — returns the top 20 scores
    - `POST /api/scores` — saves a score entry `{ name, score, wave }`
 
-The game itself runs entirely in the browser via Phaser 3 loaded from CDN. No build step required.
+The game runs entirely in the browser via Phaser 3 loaded from CDN. No build step required.
 
 ---
 
@@ -23,38 +29,26 @@ The game itself runs entirely in the browser via Phaser 3 loaded from CDN. No bu
 
 ### Requirements
 
-- Node.js 18 or higher
+- Node.js 18+
 - A MongoDB instance (local or [Atlas free tier](https://cloud.mongodb.com))
 
 ### Steps
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/Dean-Cimatu/webAppProj1.git
 cd webAppProj1
-
-# 2. Install dependencies
 npm install
-
-# 3. Set up environment variables
 cp .env.example .env
 ```
 
-Open `.env` and set your MongoDB connection string:
+Edit `.env` and set your MongoDB connection string:
 
 ```
 MONGO_URI=mongodb://localhost:27017/colosseum
 PORT=3000
 ```
 
-If you are using MongoDB Atlas, the URI looks like:
-
-```
-MONGO_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/colosseum
-```
-
 ```bash
-# 4. Start the server
 npm start
 ```
 
@@ -62,12 +56,33 @@ Open **http://localhost:3000** in your browser.
 
 ---
 
-## Environment variables
+## Deployment
 
-| Variable   | Required | Default                               |
-|------------|----------|---------------------------------------|
-| `MONGO_URI` | Yes     | `mongodb://localhost:27017/colosseum` |
-| `PORT`      | No      | `3000`                                |
+The repo includes a `render.yaml` so you can deploy to [Render](https://render.com) in a few clicks. Render's free tier is enough to run the game and leaderboard.
+
+### 1 — Set up MongoDB Atlas (free)
+
+1. Create an account at [cloud.mongodb.com](https://cloud.mongodb.com)
+2. Create a free **M0** cluster
+3. Under **Database Access**, add a user with a password
+4. Under **Network Access**, add `0.0.0.0/0` to allow connections from Render
+5. Click **Connect → Drivers** and copy the connection string — it looks like:
+   ```
+   mongodb+srv://<user>:<password>@<cluster>.mongodb.net/colosseum
+   ```
+
+### 2 — Deploy to Render
+
+1. Create an account at [render.com](https://render.com)
+2. Click **New → Web Service** and connect your GitHub repo (`Dean-Cimatu/webAppProj1`)
+3. Render will detect `render.yaml` automatically — click **Apply**
+4. Under **Environment**, add the variable:
+   ```
+   MONGO_URI = <your Atlas connection string from step 1>
+   ```
+5. Click **Deploy** — Render will install dependencies and start the server
+
+Your game will be live at `https://colosseum-fighters.onrender.com` (or similar).
 
 ---
 
@@ -77,7 +92,7 @@ Open **http://localhost:3000** in your browser.
 /
 ├── server/
 │   ├── index.js          Entry point — connects DB and starts server
-│   ├── app.js            Express setup, middleware, routes mounted
+│   ├── app.js            Express setup, middleware, routes
 │   ├── routes/
 │   │   └── scores.js     GET /api/scores, POST /api/scores
 │   └── models/
@@ -92,17 +107,24 @@ Open **http://localhost:3000** in your browser.
 │   ├── css/
 │   │   └── style.css
 │   ├── js/               Non-game browser scripts
-│   │   ├── auth.js       LocalStorage auth helper
+│   │   ├── auth.js
 │   │   ├── leaderboard.js
 │   │   ├── login.js
 │   │   ├── register.js
-│   │   ├── main.js       Home page logic
+│   │   ├── main.js
 │   │   ├── navigation.js
 │   │   └── ui-sound.js
 │   ├── game/             Phaser game (ES modules)
-│   │   ├── main.js       Phaser config + scene entry point
+│   │   ├── main.js       Phaser config + scene registry
+│   │   ├── scenes/
+│   │   │   ├── PreloadScene.js
+│   │   │   └── GameScene.js
 │   │   ├── entities/
-│   │   │   └── Enemy.js
+│   │   │   ├── Entity.js
+│   │   │   ├── Player.js
+│   │   │   ├── Enemy.js
+│   │   │   ├── Projectile.js
+│   │   │   └── WeaponEntity.js
 │   │   ├── systems/
 │   │   │   ├── behaviors.js  Weapon attack dispatch
 │   │   │   ├── waves.js      Spawn and difficulty logic
@@ -112,7 +134,16 @@ Open **http://localhost:3000** in your browser.
 │   │       ├── enemies.js
 │   │       └── items.js
 │   └── assets/           Sprites, audio, fonts
+├── render.yaml           One-click Render deployment config
 ├── package.json
-├── .env.example
-└── README.md
+└── .env.example
 ```
+
+---
+
+## Environment variables
+
+| Variable    | Required | Default                               |
+|-------------|----------|---------------------------------------|
+| `MONGO_URI` | Yes      | `mongodb://localhost:27017/colosseum` |
+| `PORT`      | No       | `3000`                                |
