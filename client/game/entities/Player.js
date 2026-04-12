@@ -1007,6 +1007,12 @@ export class Player extends Entity {
         const nameInput = document.getElementById('cf-name-input');
         const statusEl  = document.getElementById('cf-submit-status');
 
+        // Pre-fill name from JWT if the player is logged in
+        const loggedInUser = window.auth ? window.auth.getCurrentUser() : null;
+        if (loggedInUser && loggedInUser.username) {
+            nameInput.value = loggedInUser.username;
+        }
+
         const doSubmit = async () => {
             const name = nameInput.value.trim() || 'Anonymous';
             submitBtn.disabled = true;
@@ -1014,9 +1020,13 @@ export class Player extends Entity {
             statusEl.style.color = '#aaaaaa';
             statusEl.textContent = 'Submitting…';
             try {
+                const headers = { 'Content-Type': 'application/json' };
+                const token = window.auth ? window.auth.getToken() : null;
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
                 const res = await fetch('/api/scores', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers,
                     body: JSON.stringify({ name, score: finalScore, wave })
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);

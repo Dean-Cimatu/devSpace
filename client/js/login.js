@@ -1,28 +1,33 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const loginForm = document.querySelector('#loginForm form');
-
-    if (loginForm) {
-        loginForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const result = auth.login(username, password);
-
-            displayMessage(result.message, result.success ? 'success' : 'error');
-
-            if (result.success) {
-                loginForm.reset();
-                setTimeout(() => { window.location.href = '/'; }, 1500);
-            }
-        });
-    }
-
     if (auth.isLoggedIn()) {
         const user = auth.getCurrentUser();
-        displayMessage(`Welcome back, ${user.username}! Redirecting...`, 'info');
+        displayMessage(`Welcome back, ${user.username}! Redirecting…`, 'info');
         setTimeout(() => { window.location.href = '/'; }, 2000);
+        return;
     }
+
+    const loginForm = document.querySelector('#loginForm form');
+    if (!loginForm) return;
+
+    loginForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const username   = document.getElementById('username').value;
+        const password   = document.getElementById('password').value;
+        const submitBtn  = loginForm.querySelector('button[type="submit"]') || loginForm.querySelector('button');
+
+        if (submitBtn) submitBtn.disabled = true;
+
+        const result = await auth.login(username, password);
+        displayMessage(result.message, result.success ? 'success' : 'error');
+
+        if (result.success) {
+            loginForm.reset();
+            setTimeout(() => { window.location.href = '/'; }, 1500);
+        } else {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    });
 });
 
 function displayMessage(message, type = 'info') {

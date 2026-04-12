@@ -1,6 +1,8 @@
 const express = require('express');
-const router = express.Router();
-const Score = require('../models/Score');
+const router  = express.Router();
+const Score   = require('../models/Score');
+const User    = require('../models/User');
+const { optionalAuth } = require('../middleware/auth');
 
 // GET /api/scores — top 20 by score descending
 router.get('/', async (req, res) => {
@@ -17,7 +19,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/scores — save a new score entry
-router.post('/', async (req, res) => {
+router.post('/', optionalAuth, async (req, res) => {
     const { name, score, wave } = req.body || {};
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
@@ -31,11 +33,25 @@ router.post('/', async (req, res) => {
     }
 
     try {
+        const finalScore = Math.floor(score);
+        const finalWave  = Math.max(1, Math.floor(wave));
+        const userId     = req.user ? req.user.userId : null;
+
         await Score.create({
             name:  name.trim().slice(0, 16),
-            score: Math.floor(score),
-            wave:  Math.max(1, Math.floor(wave))
+            score: finalScore,
+            wave:  finalWave,
+            userId
         });
+
+        // Update the user's stats if they were authenticated
+        if (userId) {
+            await User.findByIdAndUpdate(userId, {
+                $inc: { gamesPlayed: 1 },
+                $max: { highScore: finalScore }
+            });
+        }
+
         res.status(201).json({ ok: true });
     } catch {
         res.status(500).json({ error: 'Failed to save score' });
