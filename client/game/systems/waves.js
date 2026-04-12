@@ -22,6 +22,15 @@ export function spawnSingleEnemy(scene, player, enemies, EnemyClass, currentDiff
   const y = player.sprite.y + Math.sin(angle) * distance;
   const type = getRandomEnemyType(currentDifficulty);
   const enemy = new EnemyClass(scene, player, x, y, type, currentDifficulty);
+  // Fade in from invisible so enemies don't pop into existence
+  if (enemy.sprite) {
+    enemy.sprite.setAlpha(0);
+    scene.tweens.add({ targets: enemy.sprite, alpha: 1, duration: 400, ease: 'Sine.easeOut' });
+  }
+  if (enemy.shadow) {
+    enemy.shadow.setAlpha(0);
+    scene.tweens.add({ targets: enemy.shadow, alpha: 0.8, duration: 400, ease: 'Sine.easeOut' });
+  }
   enemies.push(enemy);
   return enemy;
 }

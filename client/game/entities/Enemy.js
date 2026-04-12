@@ -237,6 +237,14 @@ export class Enemy {
       }
     }
   }
+  // Push the enemy away from (sourceX, sourceY) on hit
+  knockback(sourceX, sourceY, force = 60) {
+    if (!this.sprite || !this.sprite.body) return;
+    const angle = Phaser.Math.Angle.Between(sourceX, sourceY, this.sprite.x, this.sprite.y);
+    this.sprite.body.velocity.x += Math.cos(angle) * force;
+    this.sprite.body.velocity.y += Math.sin(angle) * force;
+  }
+
   takeDamage(damage, damageType) {
     const mult = (this.damageTakenMultiplier || 1.0);
     const typeKey = (typeof damageType === 'string') ? damageType.toLowerCase() : null;
@@ -251,17 +259,52 @@ export class Enemy {
   die() {
     this.isAlive = false;
     this.sprite.setTint(0x666666);
-    if (this.sprite.body) {
-      this.sprite.setVelocity(0, 0);
-    }
-    const giveXPTo = this.player || (this.scene && this.scene.playerRef);
+    if (this.sprite.body) this.sprite.setVelocity(0, 0);
+
+    const giveXPTo = this.player || (this.scene && (this.scene.player || this.scene.playerRef));
+    const xp = 25 + ((window.currentDifficulty || 2) * 10);
+
     if (giveXPTo) {
-      giveXPTo.gainExperience(25 + ((window.currentDifficulty || 2) * 10));
       giveXPTo.incrementKillCount();
+      this._spawnXPOrb(giveXPTo, xp);
     }
-    if (this.hpBarBg) this.hpBarBg.destroy();
+
+    if (this.hpBarBg)   this.hpBarBg.destroy();
     if (this.hpBarFill) this.hpBarFill.destroy();
-    this.scene.tweens.add({ targets: [this.sprite, this.shadow], alpha: 0, scaleY: 0.1, duration: 500, onComplete: () => this.destroy() });
+    this.scene.tweens.add({
+      targets: [this.sprite, this.shadow],
+      alpha: 0, scaleY: 0.1,
+      duration: 400,
+      onComplete: () => this.destroy()
+    });
+  }
+
+  _spawnXPOrb(player, xpAmount) {
+    const ox = this.sprite.x, oy = this.sprite.y;
+    const orb = this.scene.add.circle(ox, oy, 7, 0x44ffaa, 1);
+    orb.setDepth(500);
+    // Brief pop before flying to player
+    this.scene.tweens.add({
+      targets: orb,
+      scaleX: 1.6, scaleY: 1.6,
+      duration: 120,
+      yoyo: true,
+      onComplete: () => {
+        this.scene.tweens.add({
+          targets: orb,
+          x: player.sprite.x,
+          y: player.sprite.y,
+          scaleX: 0.4, scaleY: 0.4,
+          alpha: 0.6,
+          duration: 550,
+          ease: 'Cubic.easeIn',
+          onComplete: () => {
+            orb.destroy();
+            if (player.isAlive) player.gainExperience(xpAmount);
+          }
+        });
+      }
+    });
   }
   destroy() {
     if (this.hpBarBg) this.hpBarBg.destroy();

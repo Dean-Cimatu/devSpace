@@ -709,6 +709,7 @@ export class Player extends Entity {
                 damage += this.baseDamage;
                 if (Math.random() * 100 < this.critChance) damage = Math.floor(damage * (this.critDamage / 100));
                 enemy.takeDamage(damage, w?.damageType);
+                if (enemy.knockback) enemy.knockback(this.sprite.x, this.sprite.y, 50);
                 if (w && w.damageType && enemy.applyDebuff) enemy.applyDebuff(w.damageType, 1 + (this.debuffPower || 0));
                 this.showFloatingDamage(enemy, damage);
                 this.showAttackEffect(enemy);
@@ -889,6 +890,9 @@ export class Player extends Entity {
         if (this.currentHealth < 0) this.currentHealth = 0;
         this.sprite.setTint(0xff0000);
         this.scene.time.delayedCall(100, () => { if (this.isAlive) this.sprite.setTint(0xffffff); });
+        // Camera shake + red vignette for impact feedback
+        this.scene.cameras.main.shake(180, 0.010);
+        if (this.scene.triggerDamageFlash) this.scene.triggerDamageFlash();
         if (this.currentHealth <= 0) this.die();
         this.updateHPBar();
         this.updateUI();

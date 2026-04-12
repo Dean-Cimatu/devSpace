@@ -53,6 +53,10 @@ export default class GameScene extends Phaser.Scene {
 
         this.createProceduralTextures();
 
+        // Fullscreen damage vignette — flashes red when the player is hit
+        this._damageVignette = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0xff0000, 0);
+        this._damageVignette.setScrollFactor(0).setDepth(4000).setOrigin(0, 0);
+
         this.tilemap = this.make.tilemap({ tileWidth: TILE_SIZE, tileHeight: TILE_SIZE, width: 2000, height: 2000 });
         this.tilesets.grass   = this.tilemap.addTilesetImage('grass', 'grass', TILE_SIZE, TILE_SIZE);
         this.tileLayers.background = this.tilemap.createBlankLayer('background', [this.tilesets.grass]);
@@ -239,6 +243,20 @@ export default class GameScene extends Phaser.Scene {
                 }
             }
         }
+    }
+
+    // ─── Game-feel helpers ─────────────────────────────────────────────────────
+
+    triggerDamageFlash() {
+        if (!this._damageVignette) return;
+        this.tweens.killTweensOf(this._damageVignette);
+        this._damageVignette.setAlpha(0.38);
+        this.tweens.add({
+            targets: this._damageVignette,
+            alpha: 0,
+            duration: 420,
+            ease: 'Sine.easeOut'
+        });
     }
 
     // ─── Procedural textures & animations ─────────────────────────────────────

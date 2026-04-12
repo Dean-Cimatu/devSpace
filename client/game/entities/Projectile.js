@@ -168,6 +168,7 @@ export class Projectile {
                     this.hitTargets.add(enemy.id);
                     const sourceKey = (this.weapon && this.weapon.id) ? this.weapon.id : 'projectile';
                     enemy.tryTakeDamage(this.damage, this.weapon?.damageType, sourceKey, 140);
+                    if (enemy.knockback) enemy.knockback(this.startX, this.startY, 55);
                     if (this.weapon && this.weapon.special === 'rose_poison_aoe') {
                         enemies.forEach(e => {
                             if (!e.isAlive) return;
