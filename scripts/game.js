@@ -10,7 +10,7 @@ const DEBUG = false;
 // wave banners disabled
 const SHOW_WAVE_BANNER = false;
 // minimum wave duration
-const MIN_WAVE_DURATION_MS = 300000;
+const MIN_WAVE_DURATION_MS = 60000;
 
 const config = {
     type: Phaser.AUTO,
@@ -464,7 +464,7 @@ class Player extends Entity {
         super(scene, x, y, 'idle_0');
         this.sprite.setDisplaySize(72, 72);
         this.sprite.setCollideWorldBounds(false);
-        this.speed = 100;
+        this.speed = 150;
         this.isMoving = false;
         this.level = 1;
         this.experience = 0;
@@ -481,6 +481,7 @@ class Player extends Entity {
     // Size scaling for weapons/projectiles via item buffs
     this.weaponSizeScale = 1.0;
     this.debuffPower = 0; // boosts strength/duration of applied debuffs
+        this.score = 0;
         this.inventory = [];
         this.maxInventorySize = 10;
         this.weapons = [];
@@ -518,15 +519,18 @@ class Player extends Entity {
         this.scene.time.delayedCall(50, () => {
             this.updateHPBar();
         });
-        this.levelText = this.scene.add.text(16, 85, `Level: ${this.level}`, {
-            fontSize: '18px',
+        this.levelText = this.scene.add.text(16, 82, `Level: ${this.level}`, {
+            fontSize: '16px',
             fill: '#ffffff',
             stroke: '#000000',
             strokeThickness: 2,
             fontFamily: '"Inter", "Roboto", sans-serif'
         });
-        this.killCountText = this.scene.add.text(16, 110, `Kills: ${this.killCount}`, {
-            fontSize: '18px',
+        this.levelText.setScrollFactor(0);
+        this.levelText.setDepth(1000);
+
+        this.killCountText = this.scene.add.text(16, 102, `Kills: ${this.killCount}`, {
+            fontSize: '16px',
             fill: '#00ff00',
             stroke: '#000000',
             strokeThickness: 2,
@@ -535,14 +539,32 @@ class Player extends Entity {
         this.killCountText.setScrollFactor(0);
         this.killCountText.setDepth(1000);
 
+        this.waveText = this.scene.add.text(16, 122, `Wave: 1`, {
+            fontSize: '16px',
+            fill: '#88ccff',
+            stroke: '#000000',
+            strokeThickness: 2,
+            fontFamily: '"Inter", "Roboto", sans-serif'
+        });
+        this.waveText.setScrollFactor(0);
+        this.waveText.setDepth(1000);
+
+        this.scoreText = this.scene.add.text(16, 142, `Score: 0`, {
+            fontSize: '16px',
+            fill: '#ffdd44',
+            stroke: '#000000',
+            strokeThickness: 2,
+            fontFamily: '"Inter", "Roboto", sans-serif'
+        });
+        this.scoreText.setScrollFactor(0);
+        this.scoreText.setDepth(1000);
+
         this.createInventoryUI();
 
-        this.levelText.setScrollFactor(0);
-        this.levelText.setDepth(1000);
         this.scene.gameTimer = 0;
-        this.timerText = this.scene.add.text(16, 175, `Time: 0s`, {
-            fontSize: '16px',
-            fill: '#ffffff',
+        this.timerText = this.scene.add.text(16, 212, `Time: 0s`, {
+            fontSize: '14px',
+            fill: '#aaaaaa',
             stroke: '#000000',
             strokeThickness: 2,
             fontFamily: '"Inter", "Roboto", sans-serif'
@@ -583,7 +605,7 @@ class Player extends Entity {
         this.inventoryLevelTexts = [];
         
         const startX = 16;
-        const startY = 135;
+        const startY = 168;
         const slotSize = 32;
         const slotSpacing = 36;
         
@@ -676,6 +698,8 @@ class Player extends Entity {
         this.xpText.setText(`XP: ${this.experience}/${this.experienceToNext}`);
         this.levelText.setText(`Level: ${this.level}`);
         this.killCountText.setText(`Kills: ${this.killCount}`);
+        if (this.waveText) this.waveText.setText(`Wave: ${currentWave}`);
+        if (this.scoreText) this.scoreText.setText(`Score: ${this.score.toLocaleString()}`);
     }
     gainExperience(amount) {
         this.experience += amount;
@@ -686,6 +710,7 @@ class Player extends Entity {
     }
     incrementKillCount() {
         this.killCount++;
+        this.score += Math.max(1, 10 + Math.floor(currentDifficulty * 5) + currentWave * 2);
         this.updateUI();
     }
     addWeapon(weapon) {
@@ -1846,7 +1871,7 @@ class Player extends Entity {
         });
     }
     showAttackEffect(target) {
-        if (!this.currentWeapon.attackEffect) return;
+        if (!this.currentWeapon || !this.currentWeapon.attackEffect) return;
         const effect = this.scene.add.sprite(target.sprite.x, target.sprite.y, this.currentWeapon.attackEffect);
         effect.setDepth(1500);
         effect.setScale(1.5);
@@ -1913,105 +1938,154 @@ class Player extends Entity {
         playNextFrame();
     }
     showGameOverScreen() {
-        // Play game over SFX and fade out background music
+        // SFX + fade BGM
         try { this.scene.sound.play('sfx_gameover', { volume: 1.0 }); } catch (e) {}
         if (bgmMusic) {
             try {
                 this.scene.tweens.add({
-                    targets: bgmMusic,
-                    volume: 0,
-                    duration: 800,
-                    ease: 'Sine.easeInOut',
-                    onComplete: () => { try { bgmMusic.stop(); bgmMusic.destroy(); } catch (e) {} bgmMusic = null; }
+                    targets: bgmMusic, volume: 0, duration: 800, ease: 'Sine.easeInOut',
+                    onComplete: () => { try { bgmMusic.stop(); bgmMusic.destroy(); } catch (_) {} bgmMusic = null; }
                 });
-            } catch (e) { try { bgmMusic.stop(); bgmMusic.destroy(); } catch(_){} bgmMusic = null; }
+            } catch (_) { try { bgmMusic.stop(); bgmMusic.destroy(); } catch (_) {} bgmMusic = null; }
         }
-        // Calculate score: blend of time, level, and kills
+
         const timeSec = this.scene.gameTimer || 0;
-        const lvl = this.level || 1;
-        const kills = this.killCount || 0;
-        const score = Math.max(0, Math.floor(lvl * 500 + kills * 10 + timeSec * 5));
-        // Save to local storage via auth helper if available
-        try {
-            if (window.auth && typeof window.auth.updateUserStats === 'function') {
-                window.auth.updateUserStats(1, score); // +1 game played, record score
-            }
-        } catch (e) { /* ignore storage errors */ }
+        const finalScore = this.score + Math.floor(timeSec * 3);
+        const wave = currentWave;
+
+        // Phaser overlay
         const overlay = this.scene.add.rectangle(
-            this.scene.cameras.main.centerX,
-            this.scene.cameras.main.centerY,
-            this.scene.cameras.main.width,
-            this.scene.cameras.main.height,
-            0x000000, 0.8
+            this.scene.cameras.main.centerX, this.scene.cameras.main.centerY,
+            this.scene.cameras.main.width, this.scene.cameras.main.height, 0x000000, 0.82
         );
-        overlay.setScrollFactor(0);
-        overlay.setDepth(3000);
+        overlay.setScrollFactor(0).setDepth(3000);
+
         const gameOverText = this.scene.add.text(
-            this.scene.cameras.main.centerX,
-            this.scene.cameras.main.centerY - 100,
+            this.scene.cameras.main.centerX, this.scene.cameras.main.centerY - 130,
             'GAME OVER',
-            { fontSize: '48px', fill: '#ff0000', stroke: '#000000', strokeThickness: 4 }
+            { fontSize: '54px', fill: '#ff2222', stroke: '#000000', strokeThickness: 5, fontFamily: '"Pickyside", monospace' }
         );
-        gameOverText.setOrigin(0.5);
-        gameOverText.setScrollFactor(0);
-        gameOverText.setDepth(3001);
+        gameOverText.setOrigin(0.5).setScrollFactor(0).setDepth(3001);
+
         const statsText = this.scene.add.text(
-            this.scene.cameras.main.centerX,
-            this.scene.cameras.main.centerY - 30,
-            `Level Reached: ${this.level}\nEnemies Killed: ${this.killCount}\nDifficulty Reached: ${getDifficultyLevel()}\nTime Survived: ${this.scene.gameTimer}s\n\nScore: ${score}`,
-            { fontSize: '20px', fill: '#ffffff', stroke: '#000000', strokeThickness: 2, align: 'center' }
+            this.scene.cameras.main.centerX, this.scene.cameras.main.centerY - 50,
+            [
+                `Level: ${this.level}   |   Wave: ${wave}`,
+                `Kills: ${this.killCount}   |   Time: ${timeSec}s`,
+                ``,
+                `SCORE:  ${finalScore.toLocaleString()}`
+            ].join('\n'),
+            { fontSize: '20px', fill: '#ffffff', stroke: '#000000', strokeThickness: 2, align: 'center', lineSpacing: 6 }
         );
-        statsText.setOrigin(0.5);
-        statsText.setScrollFactor(0);
-        statsText.setDepth(3001);
+        statsText.setOrigin(0.5).setScrollFactor(0).setDepth(3001);
+
         const restartButton = this.scene.add.rectangle(
-            this.scene.cameras.main.centerX - 80,
-            this.scene.cameras.main.centerY + 80,
-            150, 50, 0x333333
+            this.scene.cameras.main.centerX - 90, this.scene.cameras.main.centerY + 110, 160, 48, 0x3a3a3a
         );
-        restartButton.setScrollFactor(0);
-        restartButton.setDepth(3001);
-        restartButton.setInteractive();
+        restartButton.setScrollFactor(0).setDepth(3001).setInteractive();
+        restartButton.setStrokeStyle(2, 0x888888);
+
         const restartText = this.scene.add.text(
-            this.scene.cameras.main.centerX - 80,
-            this.scene.cameras.main.centerY + 80,
-            'Restart',
-            { fontSize: '18px', fill: '#ffffff' }
+            this.scene.cameras.main.centerX - 90, this.scene.cameras.main.centerY + 110, 'Play Again',
+            { fontSize: '18px', fill: '#ffffff', fontFamily: '"Pickyside", monospace' }
         );
-        restartText.setOrigin(0.5);
-        restartText.setScrollFactor(0);
-        restartText.setDepth(3002);
+        restartText.setOrigin(0.5).setScrollFactor(0).setDepth(3002);
+
         const homeButton = this.scene.add.rectangle(
-            this.scene.cameras.main.centerX + 80,
-            this.scene.cameras.main.centerY + 80,
-            150, 50, 0x333333
+            this.scene.cameras.main.centerX + 90, this.scene.cameras.main.centerY + 110, 160, 48, 0x3a3a3a
         );
-        homeButton.setScrollFactor(0);
-        homeButton.setDepth(3001);
-        homeButton.setInteractive();
+        homeButton.setScrollFactor(0).setDepth(3001).setInteractive();
+        homeButton.setStrokeStyle(2, 0x888888);
+
         const homeText = this.scene.add.text(
-            this.scene.cameras.main.centerX + 80,
-            this.scene.cameras.main.centerY + 80,
-            'Home',
-            { fontSize: '18px', fill: '#ffffff' }
+            this.scene.cameras.main.centerX + 90, this.scene.cameras.main.centerY + 110, 'Main Menu',
+            { fontSize: '18px', fill: '#ffffff', fontFamily: '"Pickyside", monospace' }
         );
-        homeText.setOrigin(0.5);
-        homeText.setScrollFactor(0);
-        homeText.setDepth(3002);
+        homeText.setOrigin(0.5).setScrollFactor(0).setDepth(3002);
+
+        // Hover effects
+        [restartButton, homeButton].forEach(btn => {
+            btn.on('pointerover', () => btn.setFillStyle(0x555555));
+            btn.on('pointerout',  () => btn.setFillStyle(0x3a3a3a));
+        });
+
         const stopBgm = () => {
-            if (bgmMusic) {
-                try { bgmMusic.stop(); bgmMusic.destroy(); } catch (e) {}
-                bgmMusic = null;
+            if (bgmMusic) { try { bgmMusic.stop(); bgmMusic.destroy(); } catch (_) {} bgmMusic = null; }
+        };
+        const removeNameEntry = () => {
+            const el = document.getElementById('cf-name-entry');
+            if (el) el.remove();
+        };
+
+        restartButton.on('pointerdown', () => { removeNameEntry(); stopBgm(); this.scene.scene.restart(); });
+        homeButton.on('pointerdown',    () => { removeNameEntry(); stopBgm(); window.location.href = '../index.html'; });
+
+        // DOM name-entry overlay for leaderboard submission
+        const nameEntry = document.createElement('div');
+        nameEntry.id = 'cf-name-entry';
+        nameEntry.style.cssText = `
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            top: calc(50% + 30px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Pickyside', monospace;
+            color: white;
+            text-align: center;
+        `;
+        nameEntry.innerHTML = `
+            <p style="margin:0 0 4px;font-size:15px;color:gold;">Submit your score to the leaderboard:</p>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <input id="cf-name-input" type="text" maxlength="16" placeholder="Your name (max 16)"
+                    style="font-family:'Pickyside',monospace;font-size:14px;padding:8px 12px;
+                           border-radius:5px;border:2px solid gold;background:rgba(0,0,0,0.85);
+                           color:white;width:190px;outline:none;">
+                <button id="cf-submit-btn"
+                    style="font-family:'Pickyside',monospace;font-size:14px;padding:8px 14px;
+                           background:gold;color:black;border:none;border-radius:5px;cursor:pointer;
+                           font-weight:bold;">Submit</button>
+            </div>
+            <p id="cf-submit-status" style="margin:0;font-size:13px;min-height:18px;"></p>
+        `;
+        document.body.appendChild(nameEntry);
+
+        const submitBtn = document.getElementById('cf-submit-btn');
+        const nameInput = document.getElementById('cf-name-input');
+        const statusEl  = document.getElementById('cf-submit-status');
+
+        const doSubmit = async () => {
+            const rawName = nameInput.value.trim();
+            const name = rawName.length > 0 ? rawName : 'Anonymous';
+            submitBtn.disabled = true;
+            submitBtn.textContent = '...';
+            statusEl.style.color = '#aaaaaa';
+            statusEl.textContent = 'Submitting…';
+            try {
+                const res = await fetch('/api/scores', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, score: finalScore, wave })
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                statusEl.style.color = '#90EE90';
+                statusEl.textContent = `Score submitted! Check the leaderboard.`;
+                submitBtn.textContent = '✓';
+                nameInput.disabled = true;
+            } catch (err) {
+                statusEl.style.color = '#ff6666';
+                statusEl.textContent = `Could not submit — server offline?`;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Retry';
             }
         };
-        restartButton.on('pointerdown', () => {
-            stopBgm();
-            this.scene.scene.restart();
-        });
-        homeButton.on('pointerdown', () => {
-            stopBgm();
-            window.location.href = '../index.html';
-        });
+
+        submitBtn.addEventListener('click', doSubmit);
+        nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSubmit(); });
+        nameInput.focus();
     }
     createAnimations() {
         this.scene.anims.create({
@@ -2238,6 +2312,7 @@ function preload() {
 
 // setup game world
 function create() {
+    createProceduralTextures.call(this);
     tilemap = this.make.tilemap({
         tileWidth: TILE_SIZE,
         tileHeight: TILE_SIZE,
@@ -2345,6 +2420,31 @@ function update() {
     }
     updateChunks.call(this);
 }
+// Create simple procedural textures for projectiles that have no image asset
+function createProceduralTextures() {
+    // fireball1–5: orange/red fireballs with slight colour variation
+    const fireColors = [0xff6600, 0xff4400, 0xff8822, 0xffaa00, 0xff3300];
+    for (let i = 1; i <= 5; i++) {
+        if (this.textures.exists(`fireball${i}`)) continue;
+        const g = this.add.graphics();
+        g.fillStyle(fireColors[i - 1], 1);
+        g.fillCircle(12, 12, 12);
+        g.fillStyle(0xffee44, 0.75);
+        g.fillCircle(9, 9, 6);
+        g.generateTexture(`fireball${i}`, 24, 24);
+        g.destroy();
+    }
+    // arrow_move: a simple pointed arrow shape
+    if (!this.textures.exists('arrow_move')) {
+        const g = this.add.graphics();
+        g.fillStyle(0xddddaa, 1);
+        g.fillRect(0, 3, 18, 2);      // shaft
+        g.fillTriangle(14, 0, 24, 4, 14, 8); // head
+        g.generateTexture('arrow_move', 24, 8);
+        g.destroy();
+    }
+}
+
 function createEffectAnimations() {
     this.anims.create({
         key: 'weaponhit_effect_anim',

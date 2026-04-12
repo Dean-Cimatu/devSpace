@@ -244,8 +244,8 @@ export class Enemy {
     const flatRes = typeKey && this.resistances ? (this.resistances[typeKey] || 0) : 0;
     const scaled = Math.max(1, Math.floor(damage * mult) - flatRes);
     this.health -= scaled;
-    this.sprite.setTint(0xff0000);
-    this.scene.time.delayedCall(100, () => { if (this.isAlive) this.sprite.setTint(0xff6666); });
+    this.sprite.setTint(0xff4444);
+    this.scene.time.delayedCall(150, () => { if (this.isAlive && this.sprite) this.sprite.clearTint(); });
     if (this.health <= 0) this.die();
     this.updateHPBar();
   }

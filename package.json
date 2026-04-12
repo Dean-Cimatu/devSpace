@@ -1,0 +1,18 @@
+{
+  "name": "colosseum-fighters",
+  "version": "1.0.0",
+  "description": "Browser survival game — Phaser 3 frontend, Express/MongoDB leaderboard backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
