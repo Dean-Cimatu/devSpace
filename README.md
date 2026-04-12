@@ -75,32 +75,44 @@ Open **http://localhost:3000** in your browser.
 
 ```
 /
-├── server.js             Express server (static files + API)
+├── server/
+│   ├── index.js          Entry point — connects DB and starts server
+│   ├── app.js            Express setup, middleware, routes mounted
+│   ├── routes/
+│   │   └── scores.js     GET /api/scores, POST /api/scores
+│   └── models/
+│       └── Score.js      Mongoose schema
+├── client/               Everything served as static files
+│   ├── index.html        Home page
+│   ├── pages/
+│   │   ├── game.html
+│   │   ├── leaderboard.html
+│   │   ├── login.html
+│   │   └── register.html
+│   ├── css/
+│   │   └── style.css
+│   ├── js/               Non-game browser scripts
+│   │   ├── auth.js       LocalStorage auth helper
+│   │   ├── leaderboard.js
+│   │   ├── login.js
+│   │   ├── register.js
+│   │   ├── main.js       Home page logic
+│   │   ├── navigation.js
+│   │   └── ui-sound.js
+│   ├── game/             Phaser game (ES modules)
+│   │   ├── main.js       Phaser config + scene entry point
+│   │   ├── entities/
+│   │   │   └── Enemy.js
+│   │   ├── systems/
+│   │   │   ├── behaviors.js  Weapon attack dispatch
+│   │   │   ├── waves.js      Spawn and difficulty logic
+│   │   │   └── zones.js      Area-effect zone classes
+│   │   └── data/
+│   │       ├── weapons.js
+│   │       ├── enemies.js
+│   │       └── items.js
+│   └── assets/           Sprites, audio, fonts
 ├── package.json
 ├── .env.example
-├── index.html            Home / main menu
-├── html/
-│   ├── game.html
-│   ├── leaderboard.html
-│   ├── login.html
-│   └── register.html
-├── css/
-│   └── style.css
-├── js/
-│   ├── auth.js
-│   ├── leaderboard.js
-│   ├── navigation.js
-│   └── ui-sound.js
-├── scripts/
-│   ├── game.js           Main Phaser game
-│   ├── data/
-│   │   ├── weapons.js
-│   │   ├── enemies.js
-│   │   └── items.js
-│   └── core/
-│       ├── enemy.js
-│       ├── waves.js
-│       ├── behaviors.js
-│       └── zones.js
-└── assets/               Sprites, audio, fonts
+└── README.md
 ```

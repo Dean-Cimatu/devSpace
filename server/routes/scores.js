@@ -1,32 +1,9 @@
-require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const path = require('path');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/colosseum';
-
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname)));
-
-const scoreSchema = new mongoose.Schema({
-    name:  { type: String, required: true, maxlength: 16, trim: true },
-    score: { type: Number, required: true, min: 0 },
-    wave:  { type: Number, required: true, min: 1 },
-    date:  { type: Date,   default: Date.now }
-});
-
-const Score = mongoose.model('Score', scoreSchema);
-
-mongoose.connect(MONGO_URI)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB error:', err.message));
+const router = express.Router();
+const Score = require('../models/Score');
 
 // GET /api/scores — top 20 by score descending
-app.get('/api/scores', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const scores = await Score.find()
             .sort({ score: -1 })
@@ -40,7 +17,7 @@ app.get('/api/scores', async (req, res) => {
 });
 
 // POST /api/scores — save a new score entry
-app.post('/api/scores', async (req, res) => {
+router.post('/', async (req, res) => {
     const { name, score, wave } = req.body || {};
 
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
@@ -65,6 +42,4 @@ app.post('/api/scores', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Colosseum Fighters running on port ${PORT}`);
-});
+module.exports = router;
