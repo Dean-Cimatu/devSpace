@@ -53,16 +53,7 @@ async function updateUserStatus() {
         </div>
     `;
 
-    mainMenu.style.cssText = `
-        width: 375px;
-        margin: 0;
-        padding: 25px;
-        background: rgba(0,0,0,0.6);
-        border-radius: 15px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        text-align: center;
-        flex-shrink: 0;
-    `;
+    mainMenu.style.flexShrink = '0';
 
     const title = mainContent.querySelector('#title');
     if (title) {
@@ -70,75 +61,12 @@ async function updateUserStatus() {
         layoutContainer.appendChild(mainMenu);
         layoutContainer.appendChild(welcomePanel);
         title.insertAdjacentElement('afterend', layoutContainer);
-        addWelcomePanelStyles();
     }
 }
 
 function logout() {
     auth.logout();
     window.location.reload();
-}
-
-function addWelcomePanelStyles() {
-    if (document.getElementById('welcome-panel-styles')) return;
-
-    const style = document.createElement('style');
-    style.id = 'welcome-panel-styles';
-    style.textContent = `
-        .welcome-panel {
-            width: 400px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-            border: 2px solid gold;
-            font-family: 'Pickyside', monospace;
-        }
-        .welcome-header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid gold;
-            padding-bottom: 15px;
-        }
-        .welcome-header h2 { color: gold; font-size: 1.8em; margin: 0 0 5px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        .welcome-header h3 { color: white; font-size: 1.4em; margin: 0; font-weight: bold; }
-        .player-stats { margin: 20px 0; }
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,215,0,0.3);
-        }
-        .stat-item:last-child { border-bottom: none; }
-        .stat-label { color: white; font-weight: bold; }
-        .stat-value { color: gold; font-weight: bold; font-size: 1.1em; }
-        .user-actions {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 2px solid gold;
-        }
-        .logout-btn {
-            padding: 12px 40px;
-            cursor: pointer;
-            font-family: 'Pickyside', monospace;
-            font-weight: bold;
-            transition: all 0.2s;
-            font-size: 1em;
-            background: maroon;
-            color: gold;
-            border: 2px solid gold;
-            border-radius: 7.5px;
-        }
-        .logout-btn:hover { background: gold; color: maroon; transform: translateY(-2px); }
-        @media (max-width: 768px) {
-            .game-layout { flex-direction: column !important; align-items: center !important; }
-            .welcome-panel { width: 375px !important; }
-        }
-    `;
-    document.head.appendChild(style);
 }
 
 window.logout = logout;
