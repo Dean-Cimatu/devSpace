@@ -629,32 +629,42 @@ export class Player extends Entity {
     }
 
     performContinuousAttackFor(weapon, target) {
+        const attackAngle = target
+            ? Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, target.sprite.x, target.sprite.y)
+            : (this.lastFacingAngle || 0);
+
         const handled = executeWeaponAttack(this.scene, this, weapon, target, this.scene.enemies, this.scene.projectiles, this.scene.zones);
-        if (handled) return;
+        if (handled) {
+            // Spawn a weapon sprite sweep for all melee weapons so attacks feel physical
+            if (!weapon.projectile) this._spawnWeaponVisual(weapon, attackAngle);
+            return;
+        }
         if (weapon.projectile) {
             if (target) this.performWeaponAttack(weapon, target);
         } else {
-            const attackAngle = target
-                ? Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, target.sprite.x, target.sprite.y)
-                : (this.lastFacingAngle || 0);
             this.createWeaponAttackFor(weapon, attackAngle);
             this.createAttackHitboxFor(weapon, attackAngle);
         }
+    }
+
+    // Creates a visual-only WeaponEntity that does NOT affect attack cooldown tracking
+    _spawnWeaponVisual(weapon, angle) {
+        new WeaponEntity(this.scene, this, weapon, angle);
     }
 
     showWeaponSwingAtAngle(angle, weaponOverride = null) {
         const w   = weaponOverride || this.currentWeapon;
         const wid = (w && (w.id || w.name)) || 'default';
         const now = this.scene.time.now;
-        if (now - (this.lastTrailAt.get(wid) || 0) < 120) return;
+        if (now - (this.lastTrailAt.get(wid) || 0) < 80) return;
         this.lastTrailAt.set(wid, now);
         const g = this.scene.add.graphics();
-        g.lineStyle(6, 0xFFD700, 0.8).setDepth(200);
+        g.lineStyle(5, 0xffffff, 0.75).setDepth(200);
         const radius = w && w.attackRange ? w.attackRange : 80;
         g.beginPath();
-        g.arc(this.sprite.x, this.sprite.y, radius, angle - Math.PI / 2, angle + Math.PI / 2);
+        g.arc(this.sprite.x, this.sprite.y, radius, angle - Math.PI / 3, angle + Math.PI / 3);
         g.strokePath();
-        this.scene.tweens.add({ targets: g, alpha: 0, duration: 300, ease: 'Sine.easeOut', onComplete: () => g.destroy() });
+        this.scene.tweens.add({ targets: g, alpha: 0, duration: 160, ease: 'Sine.easeIn', onComplete: () => g.destroy() });
     }
 
     createWeaponAttack(angle) {
@@ -764,14 +774,15 @@ export class Player extends Entity {
         this.damageTextCooldowns = this.damageTextCooldowns || new Map();
         const now  = this.scene.time.now || Date.now();
         const id   = target.id || `${target.sprite.x}_${target.sprite.y}`;
-        if (now - (this.damageTextCooldowns.get(id) || 0) < 200) return;
+        if (now - (this.damageTextCooldowns.get(id) || 0) < 160) return;
         this.damageTextCooldowns.set(id, now);
-        const t = this.scene.add.text(target.sprite.x, target.sprite.y - 20, `-${Math.floor(damage)}`, {
-            fontSize: '16px', fontFamily: '"Inter", "Roboto", sans-serif', fill: '#ff4444', fontStyle: 'bold'
+        const t = this.scene.add.text(target.sprite.x, target.sprite.y - 20, `${Math.floor(damage)}`, {
+            fontSize: '14px', fontFamily: '"Inter", system-ui, sans-serif', fill: '#ffffff',
+            stroke: '#000000', strokeThickness: 3, fontStyle: 'bold'
         });
         t.setDepth(1000);
         this.scene.tweens.add({
-            targets: t, y: target.sprite.y - 60, alpha: 0, duration: 1000, ease: 'Power2',
+            targets: t, y: target.sprite.y - 52, alpha: 0, duration: 620, ease: 'Quad.easeOut',
             onComplete: () => t.destroy()
         });
     }
